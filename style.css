@@ -77,6 +77,54 @@ a.term:hover {
   text-decoration: none;
 }
 
+/* ── Term Popovers ── */
+.term-popover {
+  position: absolute;
+  z-index: 200;
+  width: 320px;
+  max-width: calc(100vw - 1.5rem);
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  animation: pop-in 0.15s ease-out;
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.term-popover-arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  transform: rotate(45deg);
+}
+.term-popover-arrow.above { bottom: -6px; border-top: none; border-left: none; }
+.term-popover-arrow.below { top: -6px; border-bottom: none; border-right: none; }
+.term-popover-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 0.4rem;
+}
+.term-popover-body {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+  margin-bottom: 0.65rem;
+}
+.term-popover-link {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.term-popover-link:hover { text-decoration: underline; }
+
 /* ── Sticky Nav ── */
 .sticky-nav {
   position: sticky;
