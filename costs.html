@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Costs — HBOT Science</title>
+<meta name="description" content="Cost analysis of home vs. clinic hyperbaric oxygen therapy, including break-even calculations.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Costs — HBOT Science">
+<meta property="og:description" content="Cost analysis of home vs. clinic hyperbaric oxygen therapy, including break-even calculations.">
+<meta property="og:url" content="https://hbot.dr34m.life/costs.html">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="mode-technical">
@@ -11,6 +16,7 @@
 <!-- ── Sticky Nav ── -->
 <nav class="sticky-nav">
   <div class="nav-inner">
+    <button class="nav-hamburger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <div class="nav-links">
       <a href="index.html">Science</a>
       <a href="safety.html">Safety</a>
@@ -20,9 +26,9 @@
     </div>
     <div class="toggle-wrap" id="nav-toggle">
       <span class="toggle-label active" id="nav-label-tech">Technical</span>
-      <div class="toggle-track technical" id="nav-track">
-        <div class="toggle-knob"></div>
-      </div>
+      <button class="toggle-track technical" id="nav-track" role="switch" aria-checked="true" aria-label="Toggle between Technical and Plain English">
+        <span class="toggle-knob"></span>
+      </button>
       <span class="toggle-label inactive" id="nav-label-plain">Plain English</span>
     </div>
   </div>
@@ -95,10 +101,10 @@
             <td class="num accent">$14,468</td>
           </tr>
           <tr class="row-highlight">
-            <td class="num">200</td>
-            <td class="num">$40,000</td>
-            <td class="num">$5,555</td>
-            <td class="num accent">$34,445</td>
+            <td class="num">260</td>
+            <td class="num">$52,000</td>
+            <td class="num">$5,570</td>
+            <td class="num accent">$46,430</td>
           </tr>
           <tr>
             <td class="num">400</td>
@@ -126,11 +132,19 @@
     </div>
 
     <div class="callout callout-amber">
-      <p><strong>At 200 sessions/year</strong> (a standard 5x/week protocol), clinic visits consume <strong>400&ndash;600 hours of transit</strong>&mdash;that's 10&ndash;15 full work weeks.</p>
-      <p>At $50/hour opportunity cost, that's <strong>$20&ndash;30K/year</strong> the dollar math doesn't show.</p>
+      <p><strong>At 260 sessions/year</strong> (a 5x/week protocol), clinic visits consume <strong>520&ndash;780 hours of transit</strong>&mdash;that's 13&ndash;20 full work weeks.</p>
+      <p>At $50/hour opportunity cost, that's <strong>$26&ndash;39K/year</strong> the dollar math doesn't show.</p>
     </div>
   </div>
 </section>
+
+<!-- ── Page Nav ── -->
+<nav class="page-nav">
+  <div class="container">
+    <a href="safety.html" class="page-nav-link prev">&larr; Safety</a>
+    <a href="glossary.html" class="page-nav-link next">Glossary &rarr;</a>
+  </div>
+</nav>
 
 <!-- ── Footer ── -->
 <footer>
@@ -141,37 +155,7 @@
 </footer>
 
 <script src="terms.js"></script>
-<script>
-(function() {
-  var s = localStorage.getItem('hbot-mode');
-  if (s === 'mode-plain' || s === 'mode-technical') document.body.className = s;
-  var nt = document.getElementById('nav-track');
-  var nlt = document.getElementById('nav-label-tech');
-  var nlp = document.getElementById('nav-label-plain');
-  function tech() { return document.body.classList.contains('mode-technical'); }
-  function set(t) {
-    var m = t ? 'mode-technical' : 'mode-plain';
-    document.body.className = m;
-    localStorage.setItem('hbot-mode', m);
-    nt.className = t ? 'toggle-track technical' : 'toggle-track plain';
-    nlt.className = t ? 'toggle-label active' : 'toggle-label inactive';
-    nlp.className = t ? 'toggle-label inactive' : 'toggle-label active';
-  }
-  set(tech());
-  nt.onclick = function() { set(!tech()); };
-  nlt.onclick = function() { set(true); };
-  nlp.onclick = function() { set(false); };
-  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-    a.addEventListener('click', function(e) {
-      var el = document.querySelector(this.getAttribute('href'));
-      if (el) {
-        e.preventDefault();
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - document.querySelector('.sticky-nav').offsetHeight - 16, behavior: 'smooth' });
-      }
-    });
-  });
-})();
-</script>
+<script src="toggle.js"></script>
 
 </body>
 </html>

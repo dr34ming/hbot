@@ -177,6 +177,8 @@
     }
   };
 
+  var activeTerm = null;
+
   function show(link) {
     close();
     var href = link.getAttribute('href');
@@ -184,9 +186,13 @@
     var t = T[id];
     if (!t) { window.location = href; return; }
 
+    activeTerm = link;
+    link.setAttribute('aria-expanded', 'true');
+
     var isTech = document.body.classList.contains('mode-technical');
     var pop = document.createElement('div');
     pop.className = 'term-popover';
+    pop.setAttribute('role', 'tooltip');
     pop.innerHTML =
       '<div class="term-popover-title">' + t.name + '</div>' +
       '<div class="term-popover-body">' + (isTech ? t.tech : t.plain) + '</div>' +
@@ -216,6 +222,10 @@
   function close() {
     var p = document.querySelector('.term-popover');
     if (p) p.remove();
+    if (activeTerm) {
+      activeTerm.removeAttribute('aria-expanded');
+      activeTerm = null;
+    }
   }
 
   document.addEventListener('click', function(e) {
@@ -225,7 +235,11 @@
   });
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === ' ') {
+      var link = e.target.closest('a.term');
+      if (link) { e.preventDefault(); show(link); }
+    }
   });
 
   // Close popover on tech/plain mode toggle

@@ -21,8 +21,12 @@
     --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
   }
   html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
-  body { font-family: var(--font); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  canvas { display: block; image-rendering: pixelated; }
+  body {
+    font-family: var(--font); color: var(--text);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    touch-action: none; -webkit-touch-callout: none; user-select: none;
+  }
+  canvas { display: block; cursor: pointer; }
   .back-link {
     position: fixed; top: 12px; left: 14px; z-index: 100;
     font-size: 13px; color: var(--text-muted); text-decoration: none;
@@ -41,347 +45,324 @@
 
 const C = document.getElementById('g');
 const ctx = C.getContext('2d');
+const FONT = getComputedStyle(document.body).fontFamily;
 
 // ─── Audio ─────────────────────────────────────────────────────────────────
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playTone(freq, dur, type = 'square', vol = 0.08) {
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type;
-  o.frequency.value = freq;
-  g.gain.value = vol;
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-  o.connect(g);
-  g.connect(audioCtx.destination);
-  o.start();
-  o.stop(audioCtx.currentTime + dur);
+let audioCtx;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playTone(freq, dur, type = 'square', vol = 0.06) {
+  if (!audioCtx) return;
+  try {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = vol;
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch(e) {}
 }
 const sfx = {
-  send:    () => playTone(520, 0.08, 'square', 0.06),
-  catch:   () => playTone(880, 0.06, 'sine', 0.05),
-  serve:   () => playTone(660, 0.12, 'triangle', 0.06),
-  miss:    () => { playTone(150, 0.3, 'sawtooth', 0.07); playTone(100, 0.4, 'sawtooth', 0.05); },
-  wave:    () => { playTone(440, 0.1, 'sine', 0.06); setTimeout(() => playTone(660, 0.1, 'sine', 0.06), 120); setTimeout(() => playTone(880, 0.15, 'sine', 0.06), 240); },
-  gameOver:() => { playTone(300, 0.2, 'square', 0.06); setTimeout(() => playTone(200, 0.3, 'square', 0.06), 200); setTimeout(() => playTone(100, 0.5, 'square', 0.07), 450); },
-  bonus:   () => { for (let i = 0; i < 5; i++) setTimeout(() => playTone(600 + i * 100, 0.08, 'sine', 0.05), i * 60); },
+  send()    { playTone(520, 0.08, 'square', 0.05); },
+  caught()  { playTone(880, 0.06, 'sine', 0.04); },
+  pressurize() { playTone(330, 0.15, 'triangle', 0.04); },
+  served()  { playTone(660, 0.12, 'triangle', 0.05); playTone(990, 0.08, 'sine', 0.03); },
+  miss()    { playTone(150, 0.3, 'sawtooth', 0.06); playTone(100, 0.4, 'sawtooth', 0.04); },
+  wave()    { playTone(440, 0.1, 'sine', 0.05); setTimeout(() => playTone(660, 0.1, 'sine', 0.05), 120); setTimeout(() => playTone(880, 0.15, 'sine', 0.05), 240); },
+  gameOver(){ playTone(300, 0.2, 'square', 0.05); setTimeout(() => playTone(200, 0.3, 'square', 0.05), 200); setTimeout(() => playTone(100, 0.5, 'square', 0.06), 450); },
+  bonus()   { for (let i = 0; i < 5; i++) setTimeout(() => playTone(600 + i * 100, 0.08, 'sine', 0.04), i * 60); },
 };
 
-// ─── Colors ────────────────────────────────────────────────────────────────
+// ─── Theme Colors ──────────────────────────────────────────────────────────
 const COL = {
   bg: '#0f1117', bgCard: '#181b24', text: '#d4d7e0', textMuted: '#8a8f9e',
-  textBright: '#eef0f6', accent: '#4a9eab', accentDim: '#3a7e8b',
-  green: '#3daa6d', amber: '#c4913a', border: '#282c3a', borderLight: '#333848',
-  chamberBody: '#1e2a35', chamberFill: '#4a9eab', chamberGlow: 'rgba(74,158,171,0.3)',
-  laneLight: '#141720', laneDark: '#111419',
-  playerSuit: '#4a9eab', playerVisor: '#2a5e68',
+  bright: '#eef0f6', accent: '#4a9eab', accentDim: '#3a7e8b',
+  green: '#3daa6d', amber: '#c4913a', red: '#e05555',
+  border: '#282c3a', borderLight: '#333848',
+  chamber: '#1e2a35', laneA: '#141720', laneB: '#111419',
 };
-const CUSTOMER_COLORS = ['#c06040', '#80a050', '#7070c0', '#c070a0', '#a09040', '#50a0a0', '#a06080', '#6090b0'];
+const CUST_COLS = ['#c06040','#80a050','#7070c0','#c070a0','#a09040','#50a0a0','#a06080','#6090b0','#b08060','#6080a0'];
 
-// ─── Game State ────────────────────────────────────────────────────────────
+// ─── Layout Constants ──────────────────────────────────────────────────────
 const LANES = 4;
-let W, H, LANE_H, LANE_Y, LEFT_X, RIGHT_X, CHAMBER_W, CHAMBER_H, PLAYER_X;
+const HUD_H = 50;
+let W, H, LH, laneY, SERVE_X, SPAWN_X, CH_W, CH_H;
 
-let state = 'title'; // title | playing | waveIntro | gameOver
-let score = 0, lives = 3, chambers = 4, wave = 1;
-let customers = [], slidingChambers = [], pressurizingChambers = [], returningChambers = [];
-let waveTimer = 0, waveCustomersLeft = 0, waveSpawnTimer = 0;
-let wavePerfect = true;
-let flashMessages = []; // {text, x, y, timer, color}
-let shakeTimer = 0, shakeIntensity = 0;
-let playerBob = 0;
-let selectedLane = -1; // for visual feedback
-
-// ─── Sizing ────────────────────────────────────────────────────────────────
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  const maxW = Math.min(window.innerWidth, 900);
-  const maxH = Math.min(window.innerHeight - 20, 640);
-  const aspect = 16 / 10;
-  if (maxW / maxH > aspect) {
-    H = maxH; W = Math.floor(H * aspect);
-  } else {
-    W = maxW; H = Math.floor(W / aspect);
-  }
-  C.style.width = W + 'px';
-  C.style.height = H + 'px';
-  C.width = Math.floor(W * dpr);
-  C.height = Math.floor(H * dpr);
+  const maxW = Math.min(window.innerWidth, 960);
+  const maxH = Math.min(window.innerHeight - 10, 660);
+  const ar = 16 / 10;
+  if (maxW / maxH > ar) { H = maxH; W = Math.floor(H * ar); }
+  else { W = maxW; H = Math.floor(W / ar); }
+  C.style.width = W + 'px'; C.style.height = H + 'px';
+  C.width = Math.floor(W * dpr); C.height = Math.floor(H * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  const topBar = 50;
-  LANE_H = Math.floor((H - topBar - 20) / LANES);
-  LANE_Y = i => topBar + 10 + i * LANE_H;
-  LEFT_X = 70;
-  RIGHT_X = W - 30;
-  CHAMBER_W = Math.floor(LANE_H * 0.7);
-  CHAMBER_H = Math.floor(LANE_H * 0.45);
-  PLAYER_X = 20;
+  LH = Math.floor((H - HUD_H - 16) / LANES);
+  laneY = i => HUD_H + 8 + i * LH;
+  SERVE_X = 65;   // left edge where player stands / chambers originate
+  SPAWN_X = W - 20; // right edge where customers spawn
+  CH_W = Math.floor(LH * 0.72);
+  CH_H = Math.floor(LH * 0.46);
 }
 resize();
 window.addEventListener('resize', resize);
 
-// ─── Wave Configuration ────────────────────────────────────────────────────
-function waveConfig(w) {
-  const customerCount = 3 + w * 2 + Math.floor(w * 0.5);
-  const speed = 28 + w * 7; // pixels per second
-  const spawnInterval = Math.max(0.6, 2.8 - w * 0.25);
-  const pressureTime = Math.max(1.5, 3.0 - w * 0.15);
-  return { customerCount, speed, spawnInterval, pressureTime };
+// ─── Game State ────────────────────────────────────────────────────────────
+let state = 'title'; // title | waveIntro | playing | gameOver
+let score, lives, chamberCount, wave;
+let customers, chambers, returning;
+let waveLeft, spawnTimer, wavePerfect;
+let waveIntroTimer;
+let flashes, shakeT, shakeI, tick;
+
+function resetGame() {
+  score = 0; lives = 3; chamberCount = 4; wave = 0;
+  customers = []; chambers = []; returning = [];
+  flashes = []; shakeT = 0; shakeI = 0; tick = 0;
 }
 
-// ─── Init ──────────────────────────────────────────────────────────────────
-function startGame() {
-  score = 0; lives = 3; chambers = 4; wave = 1;
-  customers = []; slidingChambers = []; pressurizingChambers = []; returningChambers = [];
-  flashMessages = [];
-  startWave();
+// ─── Wave Config ───────────────────────────────────────────────────────────
+function waveCfg(w) {
+  return {
+    count: Math.min(3 + w * 2, 25),
+    speed: 30 + w * 8,                              // customer walk px/s
+    spawnMin: Math.max(0.5, 2.2 - w * 0.18),        // min time between spawns
+    spawnMax: Math.max(1.0, 3.5 - w * 0.22),        // max time between spawns
+    pressTime: Math.max(1.2, 3.0 - w * 0.18),       // seconds to pressurize
+    returnSpeed: 180 + w * 20,                       // chamber return speed
+    chamberSlideSpeed: 380 + w * 10,                 // chamber send speed
+  };
 }
 
 function startWave() {
-  const cfg = waveConfig(wave);
-  waveCustomersLeft = cfg.customerCount;
-  waveSpawnTimer = 1.0; // initial delay
+  wave++;
+  const cfg = waveCfg(wave);
+  waveLeft = cfg.count;
+  spawnTimer = 0.8;
   wavePerfect = true;
   state = 'waveIntro';
-  waveTimer = 1.8;
+  waveIntroTimer = 1.6;
   sfx.wave();
 }
 
-function nextWave() {
-  wave++;
-  startWave();
-}
-
-// ─── Customer Spawning ─────────────────────────────────────────────────────
+// ─── Spawning ──────────────────────────────────────────────────────────────
 function spawnCustomer() {
-  if (waveCustomersLeft <= 0) return;
-  // pick a lane, prefer lanes without approaching customers
-  const laneCounts = new Array(LANES).fill(0);
-  customers.forEach(c => laneCounts[c.lane]++);
-  let candidates = [];
-  for (let i = 0; i < LANES; i++) {
-    if (laneCounts[i] === 0) candidates.push(i);
-  }
-  if (candidates.length === 0) {
-    for (let i = 0; i < LANES; i++) {
-      if (laneCounts[i] < 2) candidates.push(i);
-    }
-  }
-  if (candidates.length === 0) candidates = [0, 1, 2, 3];
+  if (waveLeft <= 0) return;
 
-  const lane = candidates[Math.floor(Math.random() * candidates.length)];
-  const color = CUSTOMER_COLORS[Math.floor(Math.random() * CUSTOMER_COLORS.length)];
+  // prefer empty lanes, then least-occupied
+  const counts = new Array(LANES).fill(0);
+  for (const c of customers) if (!c.served) counts[c.lane]++;
+  const minCount = Math.min(...counts);
+  const cands = [];
+  for (let i = 0; i < LANES; i++) if (counts[i] === minCount) cands.push(i);
+
+  const lane = cands[Math.floor(Math.random() * cands.length)];
   customers.push({
-    lane, x: RIGHT_X + 20, color,
-    waiting: false, // becomes true when they stop and wait
-    happy: false,   // becomes true when served
-    happyTimer: 0,
+    lane,
+    x: SPAWN_X + 10 + Math.random() * 30,
+    color: CUST_COLS[Math.floor(Math.random() * CUST_COLS.length)],
+    served: false,   // true once pressurization complete
+    exitTimer: 0,    // counts up after served
+    inChamber: false, // true while being pressurized
   });
-  waveCustomersLeft--;
+  waveLeft--;
 }
 
-// ─── Player Action: Send Chamber ───────────────────────────────────────────
+// ─── Actions ───────────────────────────────────────────────────────────────
 function sendChamber(lane) {
-  if (state !== 'playing') return;
-  if (chambers <= 0) return;
-  // don't send if there's already a sliding chamber going right in this lane
-  if (slidingChambers.some(c => c.lane === lane && c.dir === 1)) return;
-  // don't send if there's a pressurizing chamber in this lane
-  if (pressurizingChambers.some(c => c.lane === lane)) return;
+  if (state !== 'playing' || chamberCount <= 0) return;
+  // block if there's already a sliding chamber or pressurizing one in this lane
+  if (chambers.some(c => c.lane === lane)) return;
 
-  chambers--;
-  selectedLane = lane;
-  setTimeout(() => { if (selectedLane === lane) selectedLane = -1; }, 150);
-  slidingChambers.push({
-    lane, x: LEFT_X + 30, dir: 1, // sliding right
-    speed: 350,
+  chamberCount--;
+  const cfg = waveCfg(wave);
+  chambers.push({
+    lane,
+    x: SERVE_X + 35,
+    speed: cfg.chamberSlideSpeed,
+    phase: 'sliding', // sliding | pressurizing
+    progress: 0,
+    duration: cfg.pressTime,
+    customer: null,
   });
   sfx.send();
 }
 
-// ─── Player Action: Catch Returning Chamber ────────────────────────────────
-function catchLane(lane) {
-  const idx = returningChambers.findIndex(c => c.lane === lane && c.x < LEFT_X + 60);
-  if (idx !== -1) {
-    returningChambers.splice(idx, 1);
-    chambers++;
-    sfx.catch();
-    flashMessages.push({ text: 'CAUGHT!', x: LEFT_X + 40, y: LANE_Y(lane) + LANE_H / 2, timer: 0.6, color: COL.green });
-    return true;
-  }
-  return false;
+function tryCatch(lane) {
+  // find a returning chamber in this lane near the catch zone
+  const idx = returning.findIndex(r => r.lane === lane && r.x < SERVE_X + 80);
+  if (idx === -1) return false;
+  returning.splice(idx, 1);
+  chamberCount++;
+  sfx.caught();
+  flash('CAUGHT!', SERVE_X + 50, laneY(lane) + LH / 2, COL.green);
+  return true;
 }
 
-// ─── Lane Click Handler ────────────────────────────────────────────────────
-function handleLaneAction(lane) {
+function laneAction(lane) {
   if (lane < 0 || lane >= LANES) return;
-  // try to catch first
-  if (!catchLane(lane)) {
-    sendChamber(lane);
-  }
+  if (!tryCatch(lane)) sendChamber(lane);
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+function flash(text, x, y, color) {
+  flashes.push({ text, x, y, color, t: 0.9 });
 }
 
 // ─── Update ────────────────────────────────────────────────────────────────
-let lastTime = 0;
-function update(dt) {
-  playerBob += dt * 3;
-  shakeTimer = Math.max(0, shakeTimer - dt);
+let lastT = 0;
 
-  // flash messages
-  flashMessages = flashMessages.filter(f => { f.timer -= dt; f.y -= dt * 30; return f.timer > 0; });
+function update(dt) {
+  tick += dt;
+  shakeT = Math.max(0, shakeT - dt);
+  flashes = flashes.filter(f => { f.t -= dt; f.y -= dt * 28; return f.t > 0; });
 
   if (state === 'waveIntro') {
-    waveTimer -= dt;
-    if (waveTimer <= 0) state = 'playing';
+    waveIntroTimer -= dt;
+    if (waveIntroTimer <= 0) state = 'playing';
     return;
   }
-
   if (state !== 'playing') return;
 
-  const cfg = waveConfig(wave);
+  const cfg = waveCfg(wave);
 
-  // spawn customers
-  if (waveCustomersLeft > 0) {
-    waveSpawnTimer -= dt;
-    if (waveSpawnTimer <= 0) {
+  // ── spawn ──
+  if (waveLeft > 0) {
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) {
       spawnCustomer();
-      // randomize next spawn a bit
-      waveSpawnTimer = cfg.spawnInterval * (0.6 + Math.random() * 0.8);
+      spawnTimer = cfg.spawnMin + Math.random() * (cfg.spawnMax - cfg.spawnMin);
     }
   }
 
-  // move customers
+  // ── move customers ──
   for (let i = customers.length - 1; i >= 0; i--) {
     const c = customers[i];
-    if (c.happy) {
-      c.happyTimer -= dt;
-      c.x += dt * 120; // walk away right
-      if (c.happyTimer <= 0 || c.x > RIGHT_X + 40) {
-        customers.splice(i, 1);
-      }
+
+    // served customers walk away
+    if (c.served) {
+      c.exitTimer += dt;
+      c.x += dt * 140;
+      if (c.x > SPAWN_X + 60) customers.splice(i, 1);
       continue;
     }
 
-    // check if a chamber is serving this customer
-    if (c.waiting) continue;
+    // being pressurized - don't move
+    if (c.inChamber) continue;
 
-    // approach
+    // walking toward the player
     c.x -= dt * cfg.speed;
 
-    // check if they've reached their waiting spot (some random offset from left)
-    const waitX = LEFT_X + 60 + Math.random() * 0; // they wait near the service area
-    if (c.x <= LEFT_X + CHAMBER_W + 60) {
-      c.waiting = true;
-      c.x = LEFT_X + CHAMBER_W + 60;
-    }
-
-    // reached the wall?
-    if (c.x <= LEFT_X) {
-      // lose a life
+    // hit the wall = life lost
+    if (c.x <= SERVE_X) {
       lives--;
       wavePerfect = false;
+      sfx.miss();
+      shakeT = 0.35; shakeI = 7;
+      flash('MISSED!', SERVE_X + 30, laneY(c.lane) + LH / 2, COL.red);
       customers.splice(i, 1);
-      sfx.miss();
-      shakeTimer = 0.3;
-      shakeIntensity = 6;
-      flashMessages.push({ text: 'MISSED!', x: LEFT_X + 30, y: LANE_Y(c.lane) + LANE_H / 2, timer: 1.0, color: '#e05555' });
-      if (lives <= 0) {
-        state = 'gameOver';
-        sfx.gameOver();
-        return;
-      }
+      if (lives <= 0) { state = 'gameOver'; sfx.gameOver(); return; }
     }
   }
 
-  // move sliding chambers (going right toward customers)
-  for (let i = slidingChambers.length - 1; i >= 0; i--) {
-    const ch = slidingChambers[i];
-    ch.x += dt * ch.speed * ch.dir;
+  // ── chambers (sliding + pressurizing) ──
+  for (let i = chambers.length - 1; i >= 0; i--) {
+    const ch = chambers[i];
 
-    if (ch.dir === 1) {
-      // find nearest waiting customer in this lane
-      const waiting = customers.filter(c => c.lane === ch.lane && c.waiting && !c.happy);
-      const approaching = customers.filter(c => c.lane === ch.lane && !c.waiting && !c.happy);
-      const target = waiting.length > 0 ? waiting[0] : (approaching.length > 0 ? approaching[0] : null);
+    if (ch.phase === 'sliding') {
+      ch.x += dt * ch.speed;
 
-      if (target && ch.x >= target.x - CHAMBER_W - 5) {
-        // chamber reaches customer - start pressurization
-        slidingChambers.splice(i, 1);
-        target.waiting = true;
-        pressurizingChambers.push({
-          lane: ch.lane,
-          x: target.x - CHAMBER_W,
-          progress: 0,
-          duration: cfg.pressureTime,
-          customer: target,
-        });
-        sfx.serve();
-      } else if (ch.x > RIGHT_X + 20) {
-        // chamber slid off the right (no customer to catch)
-        slidingChambers.splice(i, 1);
-        // chamber is lost
+      // find the nearest un-served customer in this lane
+      let nearest = null, nearDist = Infinity;
+      for (const c of customers) {
+        if (c.lane === ch.lane && !c.served && !c.inChamber && c.x > ch.x) {
+          const d = c.x - ch.x;
+          if (d < nearDist) { nearDist = d; nearest = c; }
+        }
+      }
+
+      if (nearest && ch.x + CH_W >= nearest.x - 5) {
+        // chamber meets customer
+        ch.phase = 'pressurizing';
+        ch.x = nearest.x - CH_W + 5;
+        ch.customer = nearest;
+        nearest.inChamber = true;
+        sfx.pressurize();
+      } else if (ch.x > SPAWN_X + 30) {
+        // slid off right edge with no customer to hit
+        chambers.splice(i, 1);
         wavePerfect = false;
-        flashMessages.push({ text: 'WASTED!', x: RIGHT_X - 30, y: LANE_Y(ch.lane) + LANE_H / 2, timer: 0.8, color: COL.amber });
+        flash('WASTED!', SPAWN_X - 40, laneY(ch.lane) + LH / 2, COL.amber);
+        // chamber is lost (doesn't come back)
+      }
+
+    } else if (ch.phase === 'pressurizing') {
+      ch.progress += dt / ch.duration;
+      if (ch.progress >= 1) {
+        // done! customer served
+        ch.customer.served = true;
+        ch.customer.inChamber = false;
+        score += 10 * wave;
+        sfx.served();
+        flash('+' + (10 * wave), ch.x + CH_W / 2, laneY(ch.lane) + LH / 2 - 12, COL.accent);
+
+        // chamber returns
+        returning.push({ lane: ch.lane, x: ch.x, speed: cfg.returnSpeed });
+        chambers.splice(i, 1);
       }
     }
   }
 
-  // pressurizing chambers
-  for (let i = pressurizingChambers.length - 1; i >= 0; i--) {
-    const pc = pressurizingChambers[i];
-    pc.progress += dt / pc.duration;
-    if (pc.progress >= 1) {
-      // done! customer is happy, chamber returns
-      pc.customer.happy = true;
-      pc.customer.happyTimer = 1.5;
-      score += 10 * wave;
-      pressurizingChambers.splice(i, 1);
-      // chamber slides back left
-      returningChambers.push({
-        lane: pc.lane,
-        x: pc.x,
-        speed: 200 + wave * 15,
-      });
-      flashMessages.push({ text: '+' + (10 * wave), x: pc.x + CHAMBER_W / 2, y: LANE_Y(pc.lane) + LANE_H / 2 - 10, timer: 0.8, color: COL.accent });
-    }
-  }
-
-  // returning chambers
-  for (let i = returningChambers.length - 1; i >= 0; i--) {
-    const rc = returningChambers[i];
-    rc.x -= dt * rc.speed;
-    if (rc.x <= LEFT_X - CHAMBER_W - 10) {
-      // missed catch!
-      returningChambers.splice(i, 1);
+  // ── returning chambers ──
+  for (let i = returning.length - 1; i >= 0; i--) {
+    const r = returning[i];
+    r.x -= dt * r.speed;
+    if (r.x <= SERVE_X - CH_W - 20) {
+      // missed catch
+      returning.splice(i, 1);
       wavePerfect = false;
-      shakeTimer = 0.2;
-      shakeIntensity = 4;
+      shakeT = 0.25; shakeI = 4;
       sfx.miss();
-      flashMessages.push({ text: 'LOST CHAMBER!', x: LEFT_X + 20, y: LANE_Y(rc.lane) + LANE_H / 2, timer: 1.0, color: '#e05555' });
-      // don't regain the chamber - it's gone
-      if (chambers <= 0 && slidingChambers.length === 0 && pressurizingChambers.length === 0 && returningChambers.length === 0) {
-        // all chambers gone and nothing in play
-        // this is effectively game over if there are customers left
-      }
+      flash('LOST CHAMBER!', SERVE_X + 20, laneY(r.lane) + LH / 2, COL.red);
+      // chamber is permanently lost
     }
   }
 
-  // check wave complete
-  if (waveCustomersLeft <= 0 && customers.length === 0 && slidingChambers.length === 0 && pressurizingChambers.length === 0 && returningChambers.length === 0) {
+  // ── wave complete check ──
+  const allDone = waveLeft <= 0
+    && customers.every(c => c.served)
+    && chambers.length === 0
+    && returning.length === 0;
+  if (allDone) {
+    // clean up served customers immediately
+    customers = [];
     if (wavePerfect) {
       const bonus = 50 * wave;
       score += bonus;
       sfx.bonus();
-      flashMessages.push({ text: 'PERFECT WAVE! +' + bonus, x: W / 2, y: H / 2, timer: 1.5, color: COL.green });
+      flash('PERFECT WAVE! +' + bonus, W / 2, H / 2, COL.green);
     }
-    // restore a chamber if below max
-    if (chambers < 4) chambers++;
-    nextWave();
+    if (chamberCount < 4) chamberCount = Math.min(4, chamberCount + 1);
+    startWave();
+  }
+
+  // ── stuck check: no chambers in play and none to send ──
+  if (chamberCount <= 0 && chambers.length === 0 && returning.length === 0) {
+    const unserved = customers.some(c => !c.served && !c.inChamber);
+    if (unserved || waveLeft > 0) {
+      // can't serve anyone, just let the customers walk to the wall
+    }
   }
 }
 
-// ─── Draw ──────────────────────────────────────────────────────────────────
-function drawRoundRect(x, y, w, h, r) {
+// ─── Drawing ───────────────────────────────────────────────────────────────
+function roundRect(x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -395,390 +376,329 @@ function drawRoundRect(x, y, w, h, r) {
   ctx.closePath();
 }
 
-function drawChamber(x, y, w, h, fillPct = 0) {
+function drawChamber(x, y, w, h, fillPct) {
   const r = h * 0.35;
   // shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  drawRoundRect(x + 2, y + 2, w, h, r);
-  ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  roundRect(x + 2, y + 3, w, h, r); ctx.fill();
   // body
-  ctx.fillStyle = COL.chamberBody;
+  ctx.fillStyle = COL.chamber;
   ctx.strokeStyle = COL.accent;
   ctx.lineWidth = 1.5;
-  drawRoundRect(x, y, w, h, r);
-  ctx.fill();
-  ctx.stroke();
-  // fill (pressurization)
+  roundRect(x, y, w, h, r); ctx.fill(); ctx.stroke();
+  // fill
   if (fillPct > 0) {
     ctx.save();
-    ctx.beginPath();
-    drawRoundRect(x + 2, y + 2, w - 4, h - 4, r - 1);
-    ctx.clip();
-    const fillW = (w - 4) * Math.min(fillPct, 1);
-    const grad = ctx.createLinearGradient(x, y, x + fillW, y);
-    grad.addColorStop(0, 'rgba(74,158,171,0.15)');
-    grad.addColorStop(1, 'rgba(74,158,171,0.5)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(x + 2, y + 2, fillW, h - 4);
-    // glow on top
-    if (fillPct > 0.3) {
-      ctx.fillStyle = `rgba(74,158,171,${0.1 + fillPct * 0.15})`;
-      ctx.fillRect(x + 2, y + 2, fillW, h - 4);
-    }
+    roundRect(x + 2, y + 2, w - 4, h - 4, r - 1); ctx.clip();
+    const fw = (w - 4) * Math.min(fillPct, 1);
+    const g = ctx.createLinearGradient(x, y, x + fw, y + h);
+    g.addColorStop(0, 'rgba(74,158,171,0.12)');
+    g.addColorStop(0.5, 'rgba(74,158,171,0.4)');
+    g.addColorStop(1, 'rgba(74,158,171,0.55)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x + 2, y + 2, fw, h - 4);
     ctx.restore();
-    // percentage text
-    ctx.fillStyle = COL.text;
-    ctx.font = `bold ${Math.floor(h * 0.3)}px ${getComputedStyle(document.body).fontFamily}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    // pct label
+    ctx.fillStyle = COL.bright;
+    ctx.font = `bold ${Math.floor(h * 0.28)}px ${FONT}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(Math.floor(fillPct * 100) + '%', x + w / 2, y + h / 2);
   }
   // window lines
-  ctx.strokeStyle = 'rgba(74,158,171,0.2)';
-  ctx.lineWidth = 0.5;
-  const windowY1 = y + h * 0.3;
-  const windowY2 = y + h * 0.7;
+  ctx.strokeStyle = 'rgba(74,158,171,0.15)';
+  ctx.lineWidth = 0.7;
   ctx.beginPath();
-  ctx.moveTo(x + w * 0.25, windowY1);
-  ctx.lineTo(x + w * 0.75, windowY1);
-  ctx.moveTo(x + w * 0.25, windowY2);
-  ctx.lineTo(x + w * 0.75, windowY2);
+  ctx.moveTo(x + w * 0.2, y + h * 0.3); ctx.lineTo(x + w * 0.8, y + h * 0.3);
+  ctx.moveTo(x + w * 0.2, y + h * 0.7); ctx.lineTo(x + w * 0.8, y + h * 0.7);
   ctx.stroke();
 }
 
-function drawCustomer(x, y, h, color, happy = false) {
-  const cw = h * 0.35;
-  const ch = h * 0.65;
-  const headR = cw * 0.38;
-  const cx = x + cw / 2;
+function drawCustomer(x, y, h, color, happy) {
+  const bw = h * 0.28;
+  const headR = bw * 0.55;
+  const cx = x + bw / 2;
+  const bodyTop = y + headR * 2 + 3;
+  const bodyH = h * 0.55;
+
+  // legs (walk animation)
+  const legPhase = Math.sin(tick * 8 + x * 0.1);
+  ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - 3, bodyTop + bodyH);
+  ctx.lineTo(cx - 3 + legPhase * 3, bodyTop + bodyH + h * 0.15);
+  ctx.moveTo(cx + 3, bodyTop + bodyH);
+  ctx.lineTo(cx + 3 - legPhase * 3, bodyTop + bodyH + h * 0.15);
+  ctx.stroke();
+
   // body
   ctx.fillStyle = color;
-  drawRoundRect(cx - cw * 0.35, y + headR * 2 + 4, cw * 0.7, ch - headR * 2 - 4, 4);
-  ctx.fill();
+  roundRect(cx - bw * 0.4, bodyTop, bw * 0.8, bodyH, 3); ctx.fill();
+
   // head
   ctx.beginPath();
-  ctx.arc(cx, y + headR + 2, headR, 0, Math.PI * 2);
-  ctx.fill();
-  // face
+  ctx.arc(cx, y + headR + 1, headR, 0, Math.PI * 2); ctx.fill();
+
   if (happy) {
     // smile
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(cx, y + headR + 2, headR * 0.45, 0.1 * Math.PI, 0.9 * Math.PI);
+    ctx.arc(cx, y + headR + 2, headR * 0.4, 0.15 * Math.PI, 0.85 * Math.PI);
     ctx.stroke();
-    // sparkle
-    ctx.fillStyle = '#fff';
-    ctx.font = `${Math.floor(headR)}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText('*', cx + headR + 3, y + headR - 2);
   } else {
     // eyes
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(cx - headR * 0.25, y + headR, headR * 0.12, 0, Math.PI * 2);
-    ctx.arc(cx + headR * 0.25, y + headR, headR * 0.12, 0, Math.PI * 2);
+    ctx.arc(cx - headR * 0.28, y + headR, 1.5, 0, Math.PI * 2);
+    ctx.arc(cx + headR * 0.28, y + headR, 1.5, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
 function drawPlayer(lane) {
-  const y = LANE_Y(lane) + LANE_H * 0.15;
-  const h = LANE_H * 0.7;
-  const x = PLAYER_X;
-  const bob = Math.sin(playerBob + lane) * 1.5;
-  const w = 30;
+  const y = laneY(lane) + LH * 0.12;
+  const h = LH * 0.76;
+  const x = 18;
+  const bob = Math.sin(tick * 2.5 + lane * 1.3) * 1.5;
+  const w = 28;
 
   // body
-  ctx.fillStyle = COL.playerSuit;
-  drawRoundRect(x, y + 10 + bob, w, h - 14, 5);
-  ctx.fill();
-
+  ctx.fillStyle = COL.accent;
+  roundRect(x, y + 12 + bob, w, h - 18, 5); ctx.fill();
   // head
   ctx.beginPath();
-  ctx.arc(x + w / 2, y + 8 + bob, 8, 0, Math.PI * 2);
-  ctx.fillStyle = COL.playerSuit;
-  ctx.fill();
-
+  ctx.arc(x + w / 2, y + 10 + bob, 8, 0, Math.PI * 2); ctx.fill();
   // visor
+  ctx.fillStyle = '#2a5e68';
   ctx.beginPath();
-  ctx.arc(x + w / 2 + 2, y + 7 + bob, 4, -0.3, Math.PI * 0.7);
-  ctx.fillStyle = COL.playerVisor;
-  ctx.fill();
-
-  // cross on suit
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 1.5;
+  ctx.arc(x + w / 2 + 2, y + 9 + bob, 4, -0.4, Math.PI * 0.6); ctx.fill();
+  // medical cross
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.8;
   ctx.beginPath();
-  ctx.moveTo(x + w / 2, y + 20 + bob);
-  ctx.lineTo(x + w / 2, y + 28 + bob);
-  ctx.moveTo(x + w / 2 - 4, y + 24 + bob);
-  ctx.lineTo(x + w / 2 + 4, y + 24 + bob);
+  ctx.moveTo(x + w / 2, y + 22 + bob); ctx.lineTo(x + w / 2, y + 30 + bob);
+  ctx.moveTo(x + w / 2 - 4, y + 26 + bob); ctx.lineTo(x + w / 2 + 4, y + 26 + bob);
   ctx.stroke();
+}
+
+function drawHeart(cx, cy, size, filled) {
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + size * 0.2);
+  ctx.bezierCurveTo(cx, cy - size * 0.1, cx - size * 0.5, cy - size * 0.35, cx - size * 0.65, cy + size * 0.05);
+  ctx.bezierCurveTo(cx - size * 0.85, cy + size * 0.55, cx, cy + size * 0.85, cx, cy + size * 0.85);
+  ctx.bezierCurveTo(cx, cy + size * 0.85, cx + size * 0.85, cy + size * 0.55, cx + size * 0.65, cy + size * 0.05);
+  ctx.bezierCurveTo(cx + size * 0.5, cy - size * 0.35, cx, cy - size * 0.1, cx, cy + size * 0.2);
+  if (filled) { ctx.fillStyle = COL.red; ctx.fill(); }
+  else { ctx.strokeStyle = '#5a2020'; ctx.lineWidth = 1.2; ctx.stroke(); }
 }
 
 function draw() {
   ctx.save();
-
-  // screen shake
-  if (shakeTimer > 0) {
-    const sx = (Math.random() - 0.5) * shakeIntensity;
-    const sy = (Math.random() - 0.5) * shakeIntensity;
-    ctx.translate(sx, sy);
+  if (shakeT > 0) {
+    ctx.translate((Math.random() - 0.5) * shakeI, (Math.random() - 0.5) * shakeI);
   }
 
-  // background
   ctx.fillStyle = COL.bg;
   ctx.fillRect(-10, -10, W + 20, H + 20);
 
-  if (state === 'title') {
-    drawTitle();
-    ctx.restore();
-    return;
-  }
+  if (state === 'title') { drawTitle(); ctx.restore(); return; }
 
-  if (state === 'gameOver') {
-    drawGame();
-    drawGameOver();
-    ctx.restore();
-    return;
-  }
+  drawPlayfield();
 
-  drawGame();
-
-  if (state === 'waveIntro') {
-    drawWaveIntro();
-  }
+  if (state === 'waveIntro') drawWaveIntro();
+  if (state === 'gameOver') drawGameOver();
 
   ctx.restore();
 }
 
-function drawGame() {
-  // ─ HUD ─
+function drawPlayfield() {
+  // ── HUD ──
   ctx.fillStyle = COL.bgCard;
-  ctx.fillRect(0, 0, W, 48);
+  ctx.fillRect(0, 0, W, HUD_H - 2);
   ctx.fillStyle = COL.border;
-  ctx.fillRect(0, 47, W, 1);
+  ctx.fillRect(0, HUD_H - 2, W, 1);
 
-  // score
-  ctx.fillStyle = COL.textBright;
-  ctx.font = `bold 18px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('SCORE: ' + score, 14, 24);
+  ctx.fillStyle = COL.bright;
+  ctx.font = `bold 18px ${FONT}`;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('SCORE  ' + score, 14, HUD_H / 2 - 5);
 
-  // wave
   ctx.fillStyle = COL.accent;
-  ctx.font = `bold 14px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.font = `bold 13px ${FONT}`;
   ctx.textAlign = 'center';
-  ctx.fillText('WAVE ' + wave, W / 2, 24);
-
-  // lives
-  ctx.textAlign = 'right';
-  for (let i = 0; i < 3; i++) {
-    const lx = W - 14 - (2 - i) * 22;
-    if (i < lives) {
-      ctx.fillStyle = '#e05555';
-      ctx.beginPath();
-      // heart shape
-      const hy = 18;
-      ctx.moveTo(lx, hy + 3);
-      ctx.bezierCurveTo(lx, hy, lx - 5, hy - 2, lx - 7, hy + 2);
-      ctx.bezierCurveTo(lx - 9, hy + 7, lx, hy + 12, lx, hy + 12);
-      ctx.bezierCurveTo(lx, hy + 12, lx + 9, hy + 7, lx + 7, hy + 2);
-      ctx.bezierCurveTo(lx + 5, hy - 2, lx, hy, lx, hy + 3);
-      ctx.fill();
-    } else {
-      ctx.strokeStyle = '#5a2020';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      const hy = 18;
-      ctx.moveTo(lx, hy + 3);
-      ctx.bezierCurveTo(lx, hy, lx - 5, hy - 2, lx - 7, hy + 2);
-      ctx.bezierCurveTo(lx - 9, hy + 7, lx, hy + 12, lx, hy + 12);
-      ctx.bezierCurveTo(lx, hy + 12, lx + 9, hy + 7, lx + 7, hy + 2);
-      ctx.bezierCurveTo(lx + 5, hy - 2, lx, hy, lx, hy + 3);
-      ctx.stroke();
-    }
-  }
+  ctx.fillText('WAVE ' + wave, W / 2, HUD_H / 2 - 5);
 
   // chambers count
   ctx.fillStyle = COL.textMuted;
-  ctx.font = `12px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.textAlign = 'right';
-  ctx.fillText('CHAMBERS: ' + chambers, W - 80, 38);
+  ctx.font = `11px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('CHAMBERS', W / 2, HUD_H / 2 + 10);
 
-  // ─ Lanes ─
+  // chamber dots
+  for (let i = 0; i < 4; i++) {
+    const dx = W / 2 - 20 + i * 13;
+    ctx.beginPath();
+    ctx.arc(dx, HUD_H / 2 + 22, 3.5, 0, Math.PI * 2);
+    if (i < chamberCount) { ctx.fillStyle = COL.accent; ctx.fill(); }
+    else { ctx.strokeStyle = COL.borderLight; ctx.lineWidth = 1; ctx.stroke(); }
+  }
+
+  // lives
+  for (let i = 0; i < 3; i++) {
+    drawHeart(W - 52 + i * 20, HUD_H / 2 - 8, 10, i < lives);
+  }
+
+  // ── Lanes ──
   for (let i = 0; i < LANES; i++) {
-    const ly = LANE_Y(i);
-    // lane background
-    ctx.fillStyle = i % 2 === 0 ? COL.laneLight : COL.laneDark;
-    ctx.fillRect(0, ly, W, LANE_H);
-
-    // selected lane highlight
-    if (selectedLane === i) {
-      ctx.fillStyle = 'rgba(74,158,171,0.06)';
-      ctx.fillRect(0, ly, W, LANE_H);
-    }
+    const y = laneY(i);
+    ctx.fillStyle = i % 2 === 0 ? COL.laneA : COL.laneB;
+    ctx.fillRect(0, y, W, LH);
 
     // lane divider
     ctx.fillStyle = COL.border;
-    ctx.fillRect(0, ly + LANE_H - 1, W, 1);
+    ctx.fillRect(0, y + LH - 1, W, 1);
 
-    // lane number
-    ctx.fillStyle = COL.textMuted;
-    ctx.font = `bold 11px ${getComputedStyle(document.body).fontFamily}`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('' + (i + 1), 6, ly + LANE_H / 2);
+    // service zone
+    ctx.fillStyle = 'rgba(74,158,171,0.06)';
+    ctx.fillRect(SERVE_X - 2, y + 2, 38, LH - 4);
 
-    // counter / service area indicator
-    ctx.fillStyle = 'rgba(74,158,171,0.08)';
-    ctx.fillRect(LEFT_X - 5, ly + 2, 40, LANE_H - 4);
-    ctx.strokeStyle = 'rgba(74,158,171,0.15)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(LEFT_X - 5, ly + 2, 40, LANE_H - 4);
+    // lane number hint
+    ctx.fillStyle = 'rgba(138,143,158,0.3)';
+    ctx.font = `bold 11px ${FONT}`;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('' + (i + 1), 6, y + LH / 2);
 
-    // draw player in each lane
     drawPlayer(i);
   }
 
-  // ─ Customers ─
-  const custH = LANE_H * 0.8;
-  const custY = i => LANE_Y(i) + LANE_H * 0.1;
+  // ── Customers ──
+  const cH = LH * 0.82;
   for (const c of customers) {
-    drawCustomer(c.x, custY(c.lane), custH, c.color, c.happy);
+    if (c.inChamber) continue; // drawn as part of chamber
+    drawCustomer(c.x, laneY(c.lane) + LH * 0.05, cH, c.color, c.served);
   }
 
-  // ─ Sliding Chambers ─
-  for (const ch of slidingChambers) {
-    const cy = LANE_Y(ch.lane) + (LANE_H - CHAMBER_H) / 2;
-    drawChamber(ch.x, cy, CHAMBER_W, CHAMBER_H, 0);
-  }
-
-  // ─ Pressurizing Chambers ─
-  for (const pc of pressurizingChambers) {
-    const cy = LANE_Y(pc.lane) + (LANE_H - CHAMBER_H) / 2;
-    drawChamber(pc.x, cy, CHAMBER_W, CHAMBER_H, pc.progress);
-    // customer is inside (draw small head poking out top)
-    if (pc.customer) {
-      const headR = CHAMBER_H * 0.15;
-      ctx.fillStyle = pc.customer.color;
+  // ── Chambers in play ──
+  for (const ch of chambers) {
+    const cy = laneY(ch.lane) + (LH - CH_H) / 2;
+    drawChamber(ch.x, cy, CH_W, CH_H, ch.phase === 'pressurizing' ? ch.progress : 0);
+    // draw customer inside during pressurization
+    if (ch.phase === 'pressurizing' && ch.customer) {
+      const headR = CH_H * 0.14;
+      ctx.fillStyle = ch.customer.color;
       ctx.beginPath();
-      ctx.arc(pc.x + CHAMBER_W * 0.7, cy + CHAMBER_H * 0.3, headR, 0, Math.PI * 2);
+      ctx.arc(ch.x + CH_W * 0.65, cy + CH_H * 0.35, headR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(ch.x + CH_W * 0.65, cy + CH_H * 0.33, headR * 0.2, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
-  // ─ Returning Chambers ─
-  for (const rc of returningChambers) {
-    const cy = LANE_Y(rc.lane) + (LANE_H - CHAMBER_H) / 2;
-    // pulsing glow to draw attention
-    const pulse = 0.3 + Math.sin(Date.now() / 150) * 0.2;
+  // ── Returning Chambers ──
+  for (const r of returning) {
+    const cy = laneY(r.lane) + (LH - CH_H) / 2;
+    // glow pulse
+    const pulse = 0.5 + Math.sin(tick * 10) * 0.3;
     ctx.shadowColor = COL.accent;
-    ctx.shadowBlur = 8 * pulse;
-    drawChamber(rc.x, cy, CHAMBER_W, CHAMBER_H, 0);
+    ctx.shadowBlur = 10 * pulse;
+    drawChamber(r.x, cy, CH_W, CH_H, 0);
     ctx.shadowBlur = 0;
-    // "CATCH!" text
-    if (rc.x < LEFT_X + 100) {
+    // catch warning
+    if (r.x < SERVE_X + 110) {
       ctx.fillStyle = COL.amber;
-      ctx.font = `bold 11px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.font = `bold 11px ${FONT}`;
       ctx.textAlign = 'center';
-      ctx.fillText('CATCH!', rc.x + CHAMBER_W / 2, LANE_Y(rc.lane) + 10);
+      const blink = Math.sin(tick * 12) > 0;
+      if (blink) ctx.fillText('CATCH!', r.x + CH_W / 2, laneY(r.lane) + 10);
     }
   }
 
-  // ─ Flash Messages ─
-  for (const f of flashMessages) {
-    ctx.globalAlpha = Math.min(1, f.timer * 2);
+  // ── Flash Messages ──
+  for (const f of flashes) {
+    ctx.globalAlpha = Math.min(1, f.t * 2.5);
     ctx.fillStyle = f.color;
-    ctx.font = `bold 14px ${getComputedStyle(document.body).fontFamily}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.font = `bold 14px ${FONT}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(f.text, f.x, f.y);
     ctx.globalAlpha = 1;
   }
 }
 
 function drawTitle() {
-  // title background
   ctx.fillStyle = COL.bg;
   ctx.fillRect(0, 0, W, H);
 
-  // chamber decoration
-  const dcw = 120, dch = 60;
+  // animated chambers in background
   for (let i = 0; i < 3; i++) {
-    const dx = W / 2 - 180 + i * 140;
-    const dy = H * 0.2 + Math.sin(Date.now() / 1000 + i) * 8;
-    ctx.globalAlpha = 0.15;
-    drawChamber(dx, dy, dcw, dch, (Math.sin(Date.now() / 2000 + i * 1.5) + 1) / 2);
+    ctx.globalAlpha = 0.12;
+    const dx = W / 2 - 200 + i * 160;
+    const dy = H * 0.15 + Math.sin(tick * 0.8 + i * 1.2) * 10;
+    drawChamber(dx, dy, 110, 55, (Math.sin(tick * 0.5 + i * 2) + 1) / 2);
     ctx.globalAlpha = 1;
   }
 
-  // title
-  ctx.fillStyle = COL.textBright;
-  ctx.font = `bold 42px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  // walking customers in background
+  for (let i = 0; i < 5; i++) {
+    ctx.globalAlpha = 0.08;
+    const cx = ((tick * 20 + i * 180) % (W + 60)) - 30;
+    drawCustomer(cx, H * 0.2 + i * 15, 50, CUST_COLS[i], false);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.fillStyle = COL.bright;
+  ctx.font = `bold 44px ${FONT}`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText('HBOT TAPPER', W / 2, H * 0.38);
 
-  // subtitle
   ctx.fillStyle = COL.accent;
-  ctx.font = `16px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.fillText('Hyperbaric Chamber Facility Simulator', W / 2, H * 0.45);
+  ctx.font = `15px ${FONT}`;
+  ctx.fillText('Hyperbaric Chamber Facility Simulator', W / 2, H * 0.44);
 
-  // instructions
-  ctx.fillStyle = COL.text;
-  ctx.font = `14px ${getComputedStyle(document.body).fontFamily}`;
   const lines = [
-    'Customers approach from the right. Send chambers to serve them!',
-    'Click a lane (or press 1-4) to send a chamber or catch a returning one.',
-    'Don\'t let customers reach the wall. Catch empty chambers when they return.',
-    '',
-    '3 lives. 4 chambers. Speed increases each wave.',
+    'Customers approach from the right -- send chambers to serve them!',
+    'Click a lane or press 1-4 to send a chamber or catch returning ones.',
+    'Miss a customer = lose a life. Miss a returning chamber = lose it forever.',
   ];
   lines.forEach((line, i) => {
-    ctx.fillStyle = line === '' ? 'transparent' : (i === lines.length - 1 ? COL.amber : COL.textMuted);
-    ctx.fillText(line, W / 2, H * 0.55 + i * 22);
+    ctx.fillStyle = COL.textMuted;
+    ctx.font = `13px ${FONT}`;
+    ctx.fillText(line, W / 2, H * 0.53 + i * 20);
   });
 
+  ctx.fillStyle = COL.amber;
+  ctx.font = `bold 13px ${FONT}`;
+  ctx.fillText('3 lives  /  4 chambers  /  speed increases each wave', W / 2, H * 0.63);
+
   // start button
-  const bw = 180, bh = 48;
-  const bx = W / 2 - bw / 2, by = H * 0.78;
-  const hover = mouseInRect(bx, by, bw, bh);
+  const bw = 190, bh = 50, bx = W / 2 - bw / 2, by = H * 0.72;
+  const hover = mx >= bx && mx <= bx + bw && my >= by && my <= by + bh;
   ctx.fillStyle = hover ? COL.accent : COL.accentDim;
-  drawRoundRect(bx, by, bw, bh, 8);
-  ctx.fill();
+  roundRect(bx, by, bw, bh, 10); ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.font = `bold 18px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.font = `bold 19px ${FONT}`;
   ctx.fillText('START GAME', W / 2, by + bh / 2);
 
-  // key hint
   ctx.fillStyle = COL.textMuted;
-  ctx.font = `12px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.fillText('or press SPACE / ENTER', W / 2, by + bh + 20);
+  ctx.font = `11px ${FONT}`;
+  ctx.fillText('or press SPACE / ENTER', W / 2, by + bh + 18);
 }
 
 function drawWaveIntro() {
   ctx.fillStyle = 'rgba(15,17,23,0.7)';
   ctx.fillRect(0, 0, W, H);
 
-  const scale = Math.min(1, (1.8 - waveTimer) * 3);
+  const s = Math.min(1, (1.6 - waveIntroTimer) * 3);
   ctx.save();
   ctx.translate(W / 2, H / 2);
-  ctx.scale(scale, scale);
-
-  ctx.fillStyle = COL.textBright;
-  ctx.font = `bold 48px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('WAVE ' + wave, 0, -10);
-
-  const cfg = waveConfig(wave);
+  ctx.scale(s, s);
+  ctx.fillStyle = COL.bright;
+  ctx.font = `bold 52px ${FONT}`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('WAVE ' + wave, 0, -12);
+  const cfg = waveCfg(wave);
   ctx.fillStyle = COL.textMuted;
-  ctx.font = `14px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.fillText(cfg.customerCount + ' customers incoming', 0, 25);
-
+  ctx.font = `14px ${FONT}`;
+  ctx.fillText(cfg.count + ' customers incoming', 0, 28);
   ctx.restore();
 }
 
@@ -786,88 +706,78 @@ function drawGameOver() {
   ctx.fillStyle = 'rgba(15,17,23,0.85)';
   ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = '#e05555';
-  ctx.font = `bold 42px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('GAME OVER', W / 2, H * 0.3);
+  ctx.fillStyle = COL.red;
+  ctx.font = `bold 44px ${FONT}`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('GAME OVER', W / 2, H * 0.28);
 
-  ctx.fillStyle = COL.textBright;
-  ctx.font = `24px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.fillText('Final Score: ' + score, W / 2, H * 0.42);
+  ctx.fillStyle = COL.bright;
+  ctx.font = `bold 26px ${FONT}`;
+  ctx.fillText('Score: ' + score, W / 2, H * 0.40);
 
   ctx.fillStyle = COL.textMuted;
-  ctx.font = `16px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.fillText('Reached Wave ' + wave, W / 2, H * 0.50);
+  ctx.font = `16px ${FONT}`;
+  ctx.fillText('Reached Wave ' + wave, W / 2, H * 0.48);
 
-  // play again button
-  const bw = 200, bh = 48;
-  const bx = W / 2 - bw / 2, by = H * 0.62;
-  const hover = mouseInRect(bx, by, bw, bh);
+  // high score (local storage)
+  const best = parseInt(localStorage.getItem('hbot-tapper-best') || '0');
+  if (score > best) {
+    localStorage.setItem('hbot-tapper-best', '' + score);
+    ctx.fillStyle = COL.green;
+    ctx.font = `bold 14px ${FONT}`;
+    ctx.fillText('NEW HIGH SCORE!', W / 2, H * 0.55);
+  } else if (best > 0) {
+    ctx.fillStyle = COL.textMuted;
+    ctx.font = `13px ${FONT}`;
+    ctx.fillText('Best: ' + best, W / 2, H * 0.55);
+  }
+
+  const bw = 200, bh = 50, bx = W / 2 - bw / 2, by = H * 0.62;
+  const hover = mx >= bx && mx <= bx + bw && my >= by && my <= by + bh;
   ctx.fillStyle = hover ? COL.accent : COL.accentDim;
-  drawRoundRect(bx, by, bw, bh, 8);
-  ctx.fill();
+  roundRect(bx, by, bw, bh, 10); ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.font = `bold 18px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.font = `bold 18px ${FONT}`;
   ctx.textAlign = 'center';
   ctx.fillText('PLAY AGAIN', W / 2, by + bh / 2);
 
   ctx.fillStyle = COL.textMuted;
-  ctx.font = `12px ${getComputedStyle(document.body).fontFamily}`;
-  ctx.fillText('or press SPACE / ENTER', W / 2, by + bh + 20);
+  ctx.font = `11px ${FONT}`;
+  ctx.fillText('or press SPACE / ENTER', W / 2, by + bh + 18);
 }
 
 // ─── Input ─────────────────────────────────────────────────────────────────
-let mouseX = -1, mouseY = -1;
-function mouseInRect(x, y, w, h) {
-  return mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+let mx = -1, my = -1;
+
+function canvasPos(e) {
+  const r = C.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: (cx - r.left) / r.width * W, y: (cy - r.top) / r.height * H };
 }
 
-function getCanvasPos(e) {
-  const rect = C.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  return {
-    x: (clientX - rect.left) / rect.width * W,
-    y: (clientY - rect.top) / rect.height * H,
-  };
-}
-
-C.addEventListener('mousemove', e => {
-  const p = getCanvasPos(e);
-  mouseX = p.x; mouseY = p.y;
-});
+C.addEventListener('mousemove', e => { const p = canvasPos(e); mx = p.x; my = p.y; });
 
 function handleClick(e) {
   e.preventDefault();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  ensureAudio();
+  const p = canvasPos(e);
+  mx = p.x; my = p.y;
 
-  const p = getCanvasPos(e);
-  mouseX = p.x; mouseY = p.y;
-
-  if (state === 'title') {
-    startGame();
-    return;
-  }
+  if (state === 'title') { resetGame(); startWave(); return; }
 
   if (state === 'gameOver') {
-    // check play again button
-    const bw = 200, bh = 48;
-    const bx = W / 2 - bw / 2, by = H * 0.62;
-    if (mouseInRect(bx, by, bw, bh)) {
-      startGame();
+    const bw = 200, bh = 50, bx = W / 2 - bw / 2, by = H * 0.62;
+    if (mx >= bx && mx <= bx + bw && my >= by && my <= by + bh) {
+      resetGame(); startWave();
     }
     return;
   }
 
   if (state === 'playing') {
-    // determine lane from click position
     for (let i = 0; i < LANES; i++) {
-      const ly = LANE_Y(i);
-      if (p.y >= ly && p.y < ly + LANE_H) {
-        handleLaneAction(i);
-        return;
-      }
+      const y = laneY(i);
+      if (p.y >= y && p.y < y + LH) { laneAction(i); return; }
     }
   }
 }
@@ -876,42 +786,27 @@ C.addEventListener('click', handleClick);
 C.addEventListener('touchstart', handleClick, { passive: false });
 
 document.addEventListener('keydown', e => {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-
-  if (state === 'title' && (e.code === 'Space' || e.code === 'Enter')) {
+  ensureAudio();
+  if ((state === 'title' || state === 'gameOver') && (e.code === 'Space' || e.code === 'Enter')) {
     e.preventDefault();
-    startGame();
+    resetGame(); startWave();
     return;
   }
-
-  if (state === 'gameOver' && (e.code === 'Space' || e.code === 'Enter')) {
-    e.preventDefault();
-    startGame();
-    return;
-  }
-
   if (state === 'playing') {
-    const keyMap = { 'Digit1': 0, 'Digit2': 1, 'Digit3': 2, 'Digit4': 3, 'Numpad1': 0, 'Numpad2': 1, 'Numpad3': 2, 'Numpad4': 3 };
-    if (e.code in keyMap) {
-      e.preventDefault();
-      handleLaneAction(keyMap[e.code]);
-    }
+    const map = { Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3 };
+    if (e.code in map) { e.preventDefault(); laneAction(map[e.code]); }
   }
 });
 
-// ─── Game Loop ─────────────────────────────────────────────────────────────
+// ─── Main Loop ─────────────────────────────────────────────────────────────
 function loop(ts) {
-  const dt = Math.min((ts - lastTime) / 1000, 0.05); // cap dt to prevent spiral
-  lastTime = ts;
+  const dt = Math.min((ts - lastT) / 1000, 0.05);
+  lastT = ts;
   update(dt);
   draw();
   requestAnimationFrame(loop);
 }
-
-requestAnimationFrame(ts => {
-  lastTime = ts;
-  requestAnimationFrame(loop);
-});
+requestAnimationFrame(ts => { lastT = ts; requestAnimationFrame(loop); });
 
 })();
 </script>

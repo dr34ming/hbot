@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Glossary — HBOT Science</title>
+<meta name="description" content="Technical and plain-language definitions of 37 terms used in HBOT science.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Glossary — HBOT Science">
+<meta property="og:description" content="Technical and plain-language definitions of 37 terms used in HBOT science.">
+<meta property="og:url" content="https://hbot.dr34m.life/glossary.html">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="mode-technical">
@@ -11,6 +16,7 @@
 <!-- ── Sticky Nav ── -->
 <nav class="sticky-nav">
   <div class="nav-inner">
+    <button class="nav-hamburger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <div class="nav-links">
       <a href="index.html">Science</a>
       <a href="safety.html">Safety</a>
@@ -20,9 +26,9 @@
     </div>
     <div class="toggle-wrap" id="nav-toggle">
       <span class="toggle-label active" id="nav-label-tech">Technical</span>
-      <div class="toggle-track technical" id="nav-track">
-        <div class="toggle-knob"></div>
-      </div>
+      <button class="toggle-track technical" id="nav-track" role="switch" aria-checked="true" aria-label="Toggle between Technical and Plain English">
+        <span class="toggle-knob"></span>
+      </button>
       <span class="toggle-label inactive" id="nav-label-plain">Plain English</span>
     </div>
   </div>
@@ -39,6 +45,7 @@
 <!-- ── Glossary ── -->
 <section>
   <div class="container">
+    <input type="text" id="glossary-search" class="glossary-search" placeholder="Filter terms..." aria-label="Filter glossary terms">
     <div class="glossary-grid">
 
       <div class="glossary-entry" id="ata">
@@ -408,10 +415,10 @@
         <h3>Tonic-Clonic Seizure</h3>
         <div class="abbr"></div>
         <div class="tech">
-          <p>A generalized seizure involving two phases: tonic (sustained skeletal muscle contraction, 10&ndash;20 seconds) followed by clonic (rhythmic jerking, 30&ndash;60 seconds). In the context of HBOT, this is the Paul Bert effect&mdash;CNS oxygen toxicity from ppO<sub>2</sub> exceeding ~1.6&ndash;1.7 ATA. Self-limiting: seizure terminates when hyperoxic exposure ends. Incidence at clinical pressure is ~1 in 634 treatments. Essentially impossible at home-chamber ppO<sub>2</sub> (~1.4 ATA).</p>
+          <p>A generalized seizure involving two phases: tonic (sustained skeletal muscle contraction, 10&ndash;20 seconds) followed by clonic (rhythmic jerking, 30&ndash;60 seconds). In the context of HBOT, this is the Paul Bert effect&mdash;CNS oxygen toxicity from ppO<sub>2</sub> exceeding ~1.6&ndash;1.7 ATA. Self-limiting: seizure terminates when hyperoxic exposure ends. Incidence at clinical pressure is ~1 in 634 treatments. At home-chamber ppO<sub>2</sub> (~1.4 ATA), the risk is essentially zero.</p>
         </div>
         <div class="plain">
-          <p>A type of seizure (stiffening then jerking) that can occur from too much oxygen. At clinical pressure, the risk is about 1 in 634 treatments, and it stops as soon as the oxygen is reduced. At home-chamber pressure, the oxygen level stays well below the seizure threshold&mdash;the risk is essentially zero.</p>
+          <p>A type of seizure (stiffening then jerking) that can occur from too much oxygen. At clinical pressure, the risk is about 1 in 634 treatments, and it stops as soon as the oxygen is reduced. At home-chamber pressure, the oxygen level stays below the seizure threshold&mdash;the risk is essentially zero.</p>
         </div>
       </div>
 
@@ -430,6 +437,14 @@
   </div>
 </section>
 
+<!-- ── Page Nav ── -->
+<nav class="page-nav">
+  <div class="container">
+    <a href="costs.html" class="page-nav-link prev">&larr; Costs</a>
+    <a href="games.html" class="page-nav-link next">Games &rarr;</a>
+  </div>
+</nav>
+
 <!-- ── Footer ── -->
 <footer>
   <div class="container">
@@ -438,27 +453,15 @@
   </div>
 </footer>
 
+<script src="terms.js"></script>
+<script src="toggle.js"></script>
 <script>
-(function() {
-  var s = localStorage.getItem('hbot-mode');
-  if (s === 'mode-plain' || s === 'mode-technical') document.body.className = s;
-  var nt = document.getElementById('nav-track');
-  var nlt = document.getElementById('nav-label-tech');
-  var nlp = document.getElementById('nav-label-plain');
-  function tech() { return document.body.classList.contains('mode-technical'); }
-  function set(t) {
-    var m = t ? 'mode-technical' : 'mode-plain';
-    document.body.className = m;
-    localStorage.setItem('hbot-mode', m);
-    nt.className = t ? 'toggle-track technical' : 'toggle-track plain';
-    nlt.className = t ? 'toggle-label active' : 'toggle-label inactive';
-    nlp.className = t ? 'toggle-label inactive' : 'toggle-label active';
-  }
-  set(tech());
-  nt.onclick = function() { set(!tech()); };
-  nlt.onclick = function() { set(true); };
-  nlp.onclick = function() { set(false); };
-})();
+document.getElementById('glossary-search').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  document.querySelectorAll('.glossary-entry').forEach(function(entry) {
+    entry.style.display = entry.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
 </script>
 
 </body>

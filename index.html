@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HBOT Science</title>
+<meta name="description" content="Eight biological mechanisms of hyperbaric oxygen therapy, the clinical evidence for each, and what works at home-chamber pressure.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HBOT Science">
+<meta property="og:description" content="Eight biological mechanisms of hyperbaric oxygen therapy, the clinical evidence for each, and what works at home-chamber pressure.">
+<meta property="og:url" content="https://hbot.dr34m.life/">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="mode-technical">
@@ -11,11 +16,13 @@
 <!-- ── Sticky Nav ── -->
 <nav class="sticky-nav">
   <div class="nav-inner">
+    <button class="nav-hamburger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <div class="nav-links">
       <a href="#what">What</a>
       <a href="#mechanisms">Mechanisms</a>
       <a href="#dose">Dose</a>
       <a href="#expect">Expect</a>
+      <a href="#start">Start</a>
       <a href="#compare">Compare</a>
       <a href="#refs">Refs</a>
       <div class="nav-divider"></div>
@@ -26,9 +33,9 @@
     </div>
     <div class="toggle-wrap" id="nav-toggle">
       <span class="toggle-label active" id="nav-label-tech">Technical</span>
-      <div class="toggle-track technical" id="nav-track">
-        <div class="toggle-knob"></div>
-      </div>
+      <button class="toggle-track technical" id="nav-track" role="switch" aria-checked="true" aria-label="Toggle between Technical and Plain English">
+        <span class="toggle-knob"></span>
+      </button>
       <span class="toggle-label inactive" id="nav-label-plain">Plain English</span>
     </div>
   </div>
@@ -41,9 +48,9 @@
     <p class="subtitle">Eight biological mechanisms, the clinical evidence for each, and what works at home-chamber pressure. February 2026.</p>
     <div class="hero-toggle">
       <span class="toggle-label" id="hero-label-tech">Technical</span>
-      <div class="toggle-track technical" id="hero-track">
-        <div class="toggle-knob"></div>
-      </div>
+      <button class="toggle-track technical" id="hero-track" role="switch" aria-checked="true" aria-label="Toggle between Technical and Plain English">
+        <span class="toggle-knob"></span>
+      </button>
       <span class="toggle-label" id="hero-label-plain">Plain English</span>
     </div>
   </div>
@@ -316,8 +323,8 @@
         <div class="timeline-phase">35&ndash;40</div>
         <div class="timeline-content">
           <strong>Inflection point</strong>
-          <span class="tech">Adaptive responses begin to outpace inflammatory processes. <a class="term" href="glossary.html#angiogenesis">Angiogenic</a> remodeling, accumulated stem cell deployment, and <a class="term" href="glossary.html#nfkb">NF-&kappa;B</a> suppression reach functional thresholds. Commonly cited as the point where subjective benefit becomes apparent.</span>
-          <span class="plain">The corner. New blood vessels have been growing, repair cells have been working, inflammation is coming down. People start noticing they feel better&mdash;clearer thinking, more energy, less pain.</span>
+          <span class="tech">Adaptive responses begin to outpace inflammatory processes. <a class="term" href="glossary.html#angiogenesis">Angiogenic</a> remodeling, accumulated stem cell deployment, and <a class="term" href="glossary.html#nfkb">NF-&kappa;B</a> suppression reach functional thresholds. The 2025 RCT dosage analysis identified 40 sessions as the optimal treatment course at 1.5 ATA.</span>
+          <span class="plain">The corner. New blood vessels have been growing, repair cells have been working, inflammation is coming down. People start noticing they feel better&mdash;clearer thinking, more energy, less pain. The clinical research pinpoints 40 sessions as the sweet spot.</span>
         </div>
       </div>
       <div class="timeline-item">
@@ -339,6 +346,77 @@
 
     <h3 style="margin-top: 2rem;">What a Session Looks Like</h3>
     <p>60&ndash;90 minutes. Pressurize over 5&ndash;15 minutes (equalize your ears like on a plane). Breathe through an oxygen mask while you read, watch something, or nap. Take 3 air breaks (mask off for 5 minutes every 20&ndash;30 minutes<span class="tech">&mdash;this creates the intermittent <a class="term" href="glossary.html#hyperoxia">hyperoxia</a>-<a class="term" href="glossary.html#normoxia">normoxia</a> cycling that amplifies <a class="term" href="glossary.html#hif1a">HIF-1&alpha;</a> signaling</span><span class="plain">&mdash;this on/off pattern amplifies the repair signal</span>). Depressurize over 5&ndash;10 minutes. Drink water.</p>
+  </div>
+</section>
+
+<!-- ── Getting Started ── -->
+<section id="start">
+  <div class="container">
+    <h2>Getting Started</h2>
+
+    <h3>Equipment</h3>
+    <div class="tech">
+      <p>A complete home HBOT setup requires four components:</p>
+      <ul class="content-list">
+        <li><strong>Chamber</strong> &mdash; 1.5 ATA-rated soft-shell chamber with interior pressure gauge and safety valve. Budget: $5&ndash;7K.</li>
+        <li><strong><a class="term" href="glossary.html#concentrator">Oxygen concentrator</a></strong> &mdash; 10 LPM unit producing ~93% O<sub>2</sub>. Budget: $2&ndash;3K.</li>
+        <li><strong>Mask and tubing</strong> &mdash; Non-rebreather mask or demand valve with DISS fitting to connect concentrator output to chamber port. Budget: $50&ndash;150.</li>
+        <li><strong>Fittings</strong> &mdash; Chamber-specific port adapters, O<sub>2</sub> tubing, and optional pulse oximeter for monitoring SpO<sub>2</sub>. Budget: $50&ndash;200.</li>
+      </ul>
+      <p><strong>All-in: ~$9K.</strong> See <a href="costs.html">Costs</a> for the full breakdown and break-even analysis.</p>
+    </div>
+    <div class="plain">
+      <p>You need four things:</p>
+      <ul class="content-list">
+        <li><strong>Chamber</strong> &mdash; A soft-shell chamber rated for 1.5 ATA. This is the big purchase ($5&ndash;7K).</li>
+        <li><strong>Oxygen concentrator</strong> &mdash; A machine that pulls oxygen from room air and concentrates it to ~93%. $2&ndash;3K.</li>
+        <li><strong>Mask and tubing</strong> &mdash; Connects the concentrator to you inside the chamber. $50&ndash;150.</li>
+        <li><strong>Fittings and extras</strong> &mdash; Adapters for your specific chamber, plus optionally a finger pulse oximeter. $50&ndash;200.</li>
+      </ul>
+      <p><strong>Total: about $9K.</strong> See <a href="costs.html">Costs</a> for how fast it pays for itself vs. clinic visits.</p>
+    </div>
+
+    <h3 style="margin-top: 2rem;">Talk to Your Doctor</h3>
+    <div class="tech">
+      <p>Most physicians have limited exposure to hyperbaric medicine outside wound care. Frame the conversation around your specific goals and the evidence base:</p>
+      <ul class="content-list">
+        <li>Mention that you're considering a 1.5 ATA home protocol with a <a class="term" href="glossary.html#concentrator">concentrator</a> (not 100% O<sub>2</sub> from cylinders).</li>
+        <li>Ask about contraindications specific to your history&mdash;<a href="safety.html">Safety</a> has the full list.</li>
+        <li>Request baseline labs if pursuing longevity goals: CBC, CRP, inflammatory markers. These give you before/after data.</li>
+        <li>If your doctor is unfamiliar with mild HBOT, the <a href="#refs">references section</a> has peer-reviewed sources you can share.</li>
+      </ul>
+    </div>
+    <div class="plain">
+      <p>Your doctor may not know much about home HBOT&mdash;it's not widely taught. Here's how to approach it:</p>
+      <ul class="content-list">
+        <li>Explain you're looking at a mild home setup (1.5 ATA), not a clinical chamber with pure oxygen.</li>
+        <li>Ask them to check you for the conditions listed on the <a href="safety.html">Safety</a> page.</li>
+        <li>Request baseline blood work (especially inflammation markers like CRP) so you can track changes.</li>
+        <li>If they want to read the science, point them to the <a href="#refs">references</a>&mdash;it's all peer-reviewed.</li>
+      </ul>
+    </div>
+
+    <h3 style="margin-top: 2rem;">Your First Session</h3>
+    <div class="tech">
+      <p>Expect 90 minutes total for the first few sessions (faster once you have the routine):</p>
+      <ul class="content-list">
+        <li><strong>Setup (5 min):</strong> Enter chamber, seal zipper, connect mask tubing, start concentrator.</li>
+        <li><strong>Pressurize (10&ndash;15 min):</strong> Chamber inflates to 1.5 ATA. Equalize ears frequently&mdash;swallow, yawn, or Valsalva. Go slow.</li>
+        <li><strong>Session (60 min):</strong> Breathe through mask. Take three air breaks (mask off 5 min every 20 min). Read, watch something, or sleep.</li>
+        <li><strong>Depressurize (5&ndash;10 min):</strong> Gradual pressure release. Ears equalize naturally on the way down.</li>
+        <li><strong>After:</strong> Drink water. Mild fatigue is normal. Some people feel energized; some feel tired. Both are expected.</li>
+      </ul>
+    </div>
+    <div class="plain">
+      <p>Your first time takes about 90 minutes. Here's what happens:</p>
+      <ul class="content-list">
+        <li><strong>Get in, seal up (5 min):</strong> Climb in, zip the chamber closed, put on your oxygen mask, turn on the concentrator.</li>
+        <li><strong>Pressure goes up (10&ndash;15 min):</strong> You'll feel it in your ears like on an airplane. Swallow, yawn, or pinch-and-blow. Go slow.</li>
+        <li><strong>Hang out (60 min):</strong> Breathe through the mask. Every 20 minutes, take the mask off for five minutes. Read, watch your phone, or nap.</li>
+        <li><strong>Pressure comes down (5&ndash;10 min):</strong> Gradual release. Ears handle this direction easily.</li>
+        <li><strong>Done:</strong> Drink water. You might feel tired or energized&mdash;both are normal. The tired feeling fades as you get deeper into the protocol.</li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -492,55 +570,7 @@
 </footer>
 
 <script src="terms.js"></script>
-<script>
-(function() {
-  var s = localStorage.getItem('hbot-mode');
-  if (s === 'mode-plain' || s === 'mode-technical') document.body.className = s;
-
-  var nt = document.getElementById('nav-track');
-  var nlt = document.getElementById('nav-label-tech');
-  var nlp = document.getElementById('nav-label-plain');
-
-  function tech() { return document.body.classList.contains('mode-technical'); }
-
-  function set(t) {
-    var m = t ? 'mode-technical' : 'mode-plain';
-    document.body.className = m;
-    localStorage.setItem('hbot-mode', m);
-    nt.className = t ? 'toggle-track technical' : 'toggle-track plain';
-    nlt.className = t ? 'toggle-label active' : 'toggle-label inactive';
-    nlp.className = t ? 'toggle-label inactive' : 'toggle-label active';
-    var h = document.getElementById('hero-track');
-    if (h) {
-      h.className = t ? 'toggle-track technical' : 'toggle-track plain';
-      document.getElementById('hero-label-tech').className = t ? 'toggle-label active' : 'toggle-label inactive';
-      document.getElementById('hero-label-plain').className = t ? 'toggle-label inactive' : 'toggle-label active';
-    }
-  }
-
-  set(tech());
-  nt.onclick = function() { set(!tech()); };
-  nlt.onclick = function() { set(true); };
-  nlp.onclick = function() { set(false); };
-
-  var h = document.getElementById('hero-track');
-  if (h) {
-    h.onclick = function() { set(!tech()); };
-    document.getElementById('hero-label-tech').onclick = function() { set(true); };
-    document.getElementById('hero-label-plain').onclick = function() { set(false); };
-  }
-
-  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-    a.addEventListener('click', function(e) {
-      var el = document.querySelector(this.getAttribute('href'));
-      if (el) {
-        e.preventDefault();
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - document.querySelector('.sticky-nav').offsetHeight - 16, behavior: 'smooth' });
-      }
-    });
-  });
-})();
-</script>
+<script src="toggle.js"></script>
 
 </body>
 </html>

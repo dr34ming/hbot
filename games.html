@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Games — HBOT Science</title>
+<meta name="description" content="Four interactive games teaching HBOT biology through play.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Games — HBOT Science">
+<meta property="og:description" content="Four interactive games teaching HBOT biology through play.">
+<meta property="og:url" content="https://hbot.dr34m.life/games.html">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="mode-technical">
@@ -11,6 +16,7 @@
 <!-- ── Sticky Nav ── -->
 <nav class="sticky-nav">
   <div class="nav-inner">
+    <button class="nav-hamburger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <div class="nav-links">
       <a href="index.html">Science</a>
       <a href="safety.html">Safety</a>
@@ -20,9 +26,9 @@
     </div>
     <div class="toggle-wrap" id="nav-toggle">
       <span class="toggle-label active" id="nav-label-tech">Technical</span>
-      <div class="toggle-track technical" id="nav-track">
-        <div class="toggle-knob"></div>
-      </div>
+      <button class="toggle-track technical" id="nav-track" role="switch" aria-checked="true" aria-label="Toggle between Technical and Plain English">
+        <span class="toggle-knob"></span>
+      </button>
       <span class="toggle-label inactive" id="nav-label-plain">Plain English</span>
     </div>
   </div>
@@ -124,6 +130,14 @@
   </div>
 </section>
 
+<!-- ── Page Nav ── -->
+<nav class="page-nav">
+  <div class="container">
+    <a href="glossary.html" class="page-nav-link prev">&larr; Glossary</a>
+    <a href="index.html" class="page-nav-link next">Science &rarr;</a>
+  </div>
+</nav>
+
 <!-- ── Footer ── -->
 <footer>
   <div class="container">
@@ -133,28 +147,7 @@
 </footer>
 
 <script src="terms.js"></script>
-<script>
-(function() {
-  var s = localStorage.getItem('hbot-mode');
-  if (s === 'mode-plain' || s === 'mode-technical') document.body.className = s;
-  var nt = document.getElementById('nav-track');
-  var nlt = document.getElementById('nav-label-tech');
-  var nlp = document.getElementById('nav-label-plain');
-  function tech() { return document.body.classList.contains('mode-technical'); }
-  function set(t) {
-    var m = t ? 'mode-technical' : 'mode-plain';
-    document.body.className = m;
-    localStorage.setItem('hbot-mode', m);
-    nt.className = t ? 'toggle-track technical' : 'toggle-track plain';
-    nlt.className = t ? 'toggle-label active' : 'toggle-label inactive';
-    nlp.className = t ? 'toggle-label inactive' : 'toggle-label active';
-  }
-  set(tech());
-  nt.onclick = function() { set(!tech()); };
-  nlt.onclick = function() { set(true); };
-  nlp.onclick = function() { set(false); };
-})();
-</script>
+<script src="toggle.js"></script>
 
 </body>
 </html>
