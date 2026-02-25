@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glossary — HBOT Science</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-technical">
+
+<!-- ── Sticky Nav ── -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <div class="nav-links">
+      <a href="index.html">Science</a>
+      <a href="safety.html">Safety</a>
+      <a href="costs.html">Costs</a>
+      <a href="glossary.html" class="active">Glossary</a>
+    </div>
+    <div class="toggle-wrap" id="nav-toggle">
+      <span class="toggle-label active" id="nav-label-tech">Technical</span>
+      <div class="toggle-track technical" id="nav-track">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label inactive" id="nav-label-plain">Plain English</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Page Header ── -->
+<header class="page-header">
+  <div class="container">
+    <h1>Glossary</h1>
+    <p class="subtitle">Terms used across this site. Toggle between technical definitions and plain-language explanations.</p>
+  </div>
+</header>
+
+<!-- ── Glossary ── -->
+<section>
+  <div class="container">
+    <div class="glossary-grid">
+
+      <div class="glossary-entry" id="ata">
+        <h3>ATA</h3>
+        <div class="abbr">Atmospheres Absolute</div>
+        <div class="tech">
+          <p>Unit of absolute pressure. 1 ATA equals standard atmospheric pressure at sea level (101.325 kPa / 760 mmHg). Hyperbaric pressures are expressed in ATA to include ambient pressure in the measurement&mdash;so 1.5 ATA means 50% above sea-level pressure. Dissolved gas behavior follows partial pressure, making ATA the natural unit for calculating tissue oxygenation via Henry's Law.</p>
+        </div>
+        <div class="plain">
+          <p>A way to measure pressure. 1 ATA is normal air pressure at sea level. A home HBOT chamber at 1.5 ATA means the pressure inside is 50% higher than the air around you right now.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="plasma">
+        <h3>Blood Plasma</h3>
+        <div class="abbr">~55% of blood volume</div>
+        <div class="tech">
+          <p>The liquid matrix of blood&mdash;water, electrolytes, proteins, and dissolved gases&mdash;comprising roughly 55% of total blood volume. Under hyperbaric conditions, O<sub>2</sub> dissolves directly into plasma following Henry's Law, bypassing hemoglobin transport entirely. This dissolved fraction is the sole mechanism of HBOT's oxygen delivery advantage, since hemoglobin is already 97&ndash;99% saturated at normoxia.</p>
+        </div>
+        <div class="plain">
+          <p>The liquid part of your blood (about 55% of it). During HBOT, extra oxygen dissolves directly into this liquid, which can flow into tight spaces that red blood cells can't reach.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="hemoglobin">
+        <h3>Hemoglobin</h3>
+        <div class="abbr">Hb / HbO<sub>2</sub></div>
+        <div class="tech">
+          <p>Iron-containing metalloprotein in erythrocytes responsible for ~98.5% of oxygen transport under normal conditions. Each hemoglobin molecule binds up to four O<sub>2</sub> molecules cooperatively. At sea level, arterial hemoglobin saturation (SpO<sub>2</sub>) is already 97&ndash;99%&mdash;there's essentially no room to load more. HBOT's benefit comes entirely from plasma-dissolved O<sub>2</sub>, not from increasing hemoglobin saturation.</p>
+        </div>
+        <div class="plain">
+          <p>The protein in red blood cells that carries oxygen. It's already carrying as much as it can at sea level&mdash;basically maxed out. That's why HBOT works through a different route: dissolving oxygen into the liquid part of your blood instead.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="interstitial-fluid">
+        <h3>Interstitial Fluid</h3>
+        <div class="abbr">ISF</div>
+        <div class="tech">
+          <p>Extracellular fluid occupying the spaces between cells, constituting roughly 15% of body weight. Nutrients and waste products exchange between capillaries and cells through this compartment. Plasma-dissolved O<sub>2</sub> diffuses freely into ISF, reaching tissue that hemoglobin-bound oxygen cannot access when capillaries are damaged, compressed, or absent. This is the primary therapeutic target of HBOT in ischemic and edematous tissues.</p>
+        </div>
+        <div class="plain">
+          <p>The fluid that surrounds every cell in your body. Dissolved oxygen from HBOT can seep into this fluid and reach cells that aren't getting enough oxygen because nearby blood vessels are damaged or blocked.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="concentrator">
+        <h3>Oxygen Concentrator</h3>
+        <div class="abbr">10 LPM / ~93% O<sub>2</sub></div>
+        <div class="tech">
+          <p>Pressure-swing adsorption device that separates O<sub>2</sub> from ambient air using zeolite molecular sieves, outputting approximately 93% (&plusmn;3%) oxygen at flow rates up to 10 LPM. At 1.5 ATA, a 10 LPM concentrator produces sufficient O<sub>2</sub> to saturate the chamber environment. Above 1.5 ATA the concentrator becomes the limiting factor&mdash;pressure rises but ppO<sub>2</sub> doesn't proportionally increase without switching to 100% cylinder O<sub>2</sub>.</p>
+        </div>
+        <div class="plain">
+          <p>A machine that pulls oxygen out of room air and concentrates it to about 93%. Paired with a home chamber at 1.5 ATA, it delivers the full oxygen benefit. Push the pressure higher and the machine can't keep up&mdash;you'd need medical-grade oxygen tanks instead.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="ros">
+        <h3>ROS</h3>
+        <div class="abbr">Reactive Oxygen Species</div>
+        <div class="tech">
+          <p>Chemically reactive molecules containing oxygen&mdash;superoxide (O<sub>2</sub><sup>&minus;</sup>), hydrogen peroxide (H<sub>2</sub>O<sub>2</sub>), hydroxyl radicals. At controlled levels during HBOT, ROS act as signaling molecules that upregulate antioxidant enzymes (SOD, catalase, GPx), DNA repair pathways, and cytoprotective gene expression. This is the hormetic trigger upstream of most HBOT mechanisms. Identical ROS kinetic profiles have been measured at 1.4 and 2.5 ATA.</p>
+        </div>
+        <div class="plain">
+          <p>Molecules your body makes when it gets a burst of extra oxygen. In small, controlled amounts, they act as an alarm signal that tells your cells to turn on repair and defense programs. The same signal fires at home-chamber pressure as in clinical chambers.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="hormesis">
+        <h3>Hormesis</h3>
+        <div class="abbr"></div>
+        <div class="tech">
+          <p>Dose-response phenomenon where low-level exposure to a stressor triggers adaptive responses that exceed the magnitude of the original insult. The biological basis for exercise adaptation, heat/cold conditioning, and HBOT. Hyperoxic hormesis via controlled ROS generation activates Nrf2-mediated antioxidant pathways, heat shock proteins, and DNA repair&mdash;producing a net protective effect despite the transient oxidative challenge.</p>
+        </div>
+        <div class="plain">
+          <p>The principle that a small, controlled stress makes your body stronger than before. Exercise works this way&mdash;you stress muscles and they grow back stronger. HBOT applies the same principle with oxygen: a controlled burst triggers your body to build up its defenses.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="hif1a">
+        <h3>HIF-1&alpha;</h3>
+        <div class="abbr">Hypoxia-Inducible Factor 1-alpha</div>
+        <div class="tech">
+          <p>Master transcription factor that activates over 100 downstream genes involved in angiogenesis, erythropoiesis, glucose metabolism, and cell survival. Normally degraded in the presence of oxygen via prolyl hydroxylase. The HBOT paradox: repeated hyperoxia-normoxia cycling depletes intracellular oxygen scavengers, so when the session ends, relative hypoxia triggers HIF-1&alpha; stabilization and nuclear translocation. This drives VEGF, EPO, SDF-1, and sirtuin expression between sessions.</p>
+        </div>
+        <div class="plain">
+          <p>A protein that acts as a master switch for building oxygen infrastructure&mdash;new blood vessels, more red blood cells, tissue repair. After each HBOT session, your body senses the oxygen drop-off and activates this switch. That's why the benefits build between sessions, not just during them.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="vegf">
+        <h3>VEGF</h3>
+        <div class="abbr">Vascular Endothelial Growth Factor</div>
+        <div class="tech">
+          <p>A signaling protein produced by cells in response to HIF-1&alpha; activation that stimulates vasculogenesis and angiogenesis. VEGF binds to receptors on endothelial cells, triggering proliferation, migration, and tube formation. HBOT elevates serum VEGF via the hyperoxic-hypoxic paradox. Works in concert with PDGF and FGF for vessel stabilization and maturation.</p>
+        </div>
+        <div class="plain">
+          <p>A protein that tells your body to grow new blood vessels. HBOT raises VEGF levels, which leads to new capillary formation in areas that need better circulation. Once built, these vessels are permanent infrastructure.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="angiogenesis">
+        <h3>Angiogenesis</h3>
+        <div class="abbr"></div>
+        <div class="tech">
+          <p>The physiological process of new capillary formation from pre-existing vasculature. Involves endothelial cell activation, extracellular matrix degradation, cell migration, proliferation, and tube formation. HBOT drives angiogenesis through the HIF-1&alpha;/VEGF/SDF-1 signaling cascade. Clinically documented in diabetic wound healing models and crush injury RCTs. The resulting vascular remodeling persists after treatment cessation.</p>
+        </div>
+        <div class="plain">
+          <p>Growing new tiny blood vessels from existing ones. HBOT triggers this process, improving circulation to areas that were oxygen-starved. The new vessels stay after you stop treatment&mdash;it's permanent construction, not a temporary boost.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="enos">
+        <h3>eNOS</h3>
+        <div class="abbr">Endothelial Nitric Oxide Synthase</div>
+        <div class="tech">
+          <p>An enzyme in bone marrow endothelial cells that catalyzes nitric oxide (NO) production from L-arginine. Under hyperoxic conditions, eNOS activation triggers a cascade: NO &rarr; MMP-9 activation &rarr; cleavage of membrane-bound Kit ligand &rarr; release of CD34+ progenitor cells from their bone marrow niche into peripheral circulation. This is the mechanism by which HBOT mobilizes stem cells.</p>
+        </div>
+        <div class="plain">
+          <p>An enzyme in your bone marrow that responds to HBOT by producing a signal molecule (nitric oxide). This signal unlocks stem cells from the bone marrow, releasing them into your bloodstream to find and repair damaged tissue throughout your body.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="cd34">
+        <h3>CD34+ Cells</h3>
+        <div class="abbr">Stem / Progenitor Cells</div>
+        <div class="tech">
+          <p>Hematopoietic progenitor cells expressing the CD34 surface glycoprotein, capable of differentiating into endothelial cells, smooth muscle, and other tissue types. Reside in bone marrow and are mobilized into circulation via eNOS/MMP-9 signaling during HBOT. Home to damaged tissue via SDF-1 chemotaxis. A single HBOT session at 2.0 ATA doubles circulating CD34+ counts; dose-response is continuous, with measurable mobilization even at 1.27 ATA with air.</p>
+        </div>
+        <div class="plain">
+          <p>Your body's repair cells, stored in bone marrow. They can travel through your bloodstream to damaged areas and become the type of cell needed for repair. HBOT releases more of them into circulation&mdash;a single session doubles the count. Even mild pressure works; it's a dial, not a switch.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="telomeres">
+        <h3>Telomeres</h3>
+        <div class="abbr"></div>
+        <div class="tech">
+          <p>Repetitive nucleotide sequences (TTAGGG in humans) capping chromosome ends, preventing degradation and end-to-end fusion during replication. Telomeres shorten with each cell division due to the end-replication problem; length is a validated biomarker of biological aging. The Efrati 2020 trial demonstrated 20&ndash;38% telomere lengthening across immune cell subtypes after 60 HBOT sessions at 2.0 ATA/100% O<sub>2</sub>. Mechanism likely involves telomerase upregulation via HIF-1&alpha;.</p>
+        </div>
+        <div class="plain">
+          <p>Protective caps on the ends of your DNA, like the plastic tips on shoelaces. They get shorter each time a cell divides, and their length is one of the best-known markers of biological age. A clinical trial showed HBOT lengthened them by 20&ndash;38%&mdash;but only at clinical pressure (2.0 ATA), not yet proven at home levels.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="senescent">
+        <h3>Senescent Cells</h3>
+        <div class="abbr">"Zombie Cells"</div>
+        <div class="tech">
+          <p>Cells that have exited the cell cycle irreversibly (replicative arrest) but resist apoptosis and remain metabolically active. They accumulate with age and secrete SASP&mdash;a cocktail of pro-inflammatory cytokines, chemokines, and matrix metalloproteinases&mdash;driving chronic low-grade inflammation ("inflammaging"). The Efrati trial showed 11&ndash;37% reduction in senescent T cell populations after 60 HBOT sessions at 2.0 ATA, likely via immune-mediated clearance rather than direct senolysis.</p>
+        </div>
+        <div class="plain">
+          <p>Cells that stop doing their job but refuse to die. They sit in your tissues and leak inflammatory molecules that damage everything around them. HBOT at clinical pressure reduced these cells by 11&ndash;37% in a human trial&mdash;something the pharmaceutical industry is spending billions trying to achieve with drugs.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="sasp">
+        <h3>SASP</h3>
+        <div class="abbr">Senescence-Associated Secretory Phenotype</div>
+        <div class="tech">
+          <p>The pro-inflammatory secretome of senescent cells, comprising IL-6, IL-8, TNF-&alpha;, MCP-1, VEGF, and matrix metalloproteinases (MMPs) among others. SASP drives paracrine senescence (spreading the senescent phenotype to neighboring cells), extracellular matrix degradation, and chronic tissue inflammation. It's a primary driver of age-related pathology and a key target of both senolytic drugs and HBOT-mediated clearance protocols.</p>
+        </div>
+        <div class="plain">
+          <p>The inflammatory cocktail that zombie cells (senescent cells) constantly leak into surrounding tissue. It causes chronic inflammation, damages nearby healthy cells, and can even turn them into zombie cells too. Reducing the source cells is the goal&mdash;stop the leak by clearing the leakers.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="nfkb">
+        <h3>NF-&kappa;B</h3>
+        <div class="abbr">Nuclear Factor Kappa B</div>
+        <div class="tech">
+          <p>A family of transcription factors (p50/p65 heterodimer being canonical) that regulate expression of genes involved in inflammation, immune response, and cell survival. Normally sequestered in the cytoplasm by I&kappa;B inhibitor proteins. Activation leads to translocation to the nucleus and transcription of TNF-&alpha;, IL-1&beta;, IL-6, COX-2, and iNOS. HBOT suppresses NF-&kappa;B signaling, reducing downstream inflammatory mediators. This suppression operates wherever hyperoxia is achieved, including at 1.4&ndash;1.5 ATA.</p>
+        </div>
+        <div class="plain">
+          <p>The master switch for inflammation genes. When it's on, your body produces pain, swelling, and fatigue signals. HBOT turns this switch down, reducing chronic inflammation. This works at home-chamber pressure&mdash;anywhere extra oxygen reaches, the anti-inflammatory effect follows.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="sirtuin">
+        <h3>Sirtuins</h3>
+        <div class="abbr">SIRT1&ndash;SIRT7</div>
+        <div class="tech">
+          <p>A family of NAD+-dependent deacetylases involved in DNA repair, mitochondrial biogenesis, metabolic regulation, and stress resistance. SIRT1 and SIRT3 are the most studied in longevity contexts. HBOT upregulates sirtuin expression via the HIF-1&alpha; pathway. Sirtuins are also the downstream target of caloric restriction and NAD+ precursor supplementation (NMN/NR), placing HBOT in the same signaling network as these established longevity interventions.</p>
+        </div>
+        <div class="plain">
+          <p>A family of proteins that manage cellular repair and longevity. They're the same proteins activated by calorie restriction and NAD+ supplements. HBOT activates them through the HIF-1&alpha; pathway, linking it to the same repair network as other longevity interventions.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="neuroplasticity">
+        <h3>Neuroplasticity</h3>
+        <div class="abbr"></div>
+        <div class="tech">
+          <p>The brain's capacity to reorganize synaptic connections, form new neural pathways, and modulate existing circuitry in response to experience, injury, or environmental change. HBOT promotes neuroplasticity through multiple converging mechanisms: direct oxygenation of hypoperfused brain tissue, cerebral angiogenesis, reduction of neuroinflammation via microglial suppression, and upregulation of neurotrophic factors (BDNF, NGF). The 2025 RCT at 1.5 ATA demonstrated measurable cognitive improvement consistent with enhanced neuroplastic processes.</p>
+        </div>
+        <div class="plain">
+          <p>Your brain's ability to rewire itself&mdash;forming new connections and strengthening existing ones. HBOT supports this by getting more oxygen to brain tissue, growing new blood vessels in the brain, and reducing neuroinflammation. A clinical trial at home-chamber pressure showed real cognitive improvements from this process.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="henrys-law">
+        <h3>Henry's Law</h3>
+        <div class="abbr"></div>
+        <div class="tech">
+          <p>At constant temperature, the amount of gas dissolved in a liquid is directly proportional to the partial pressure of that gas above the liquid. Formally: C = k<sub>H</sub> &middot; P, where C is dissolved concentration, k<sub>H</sub> is Henry's constant, and P is partial pressure. This is the physics underlying all of HBOT: doubling the pressure above blood plasma doubles the dissolved O<sub>2</sub>. It's why the jump from 1.0 to 1.5 ATA produces a 10x dissolved O<sub>2</sub> increase when paired with concentrated oxygen.</p>
+        </div>
+        <div class="plain">
+          <p>A physics law: more pressure above a liquid means more gas dissolves into it. This is why HBOT works. Increase the air pressure, add concentrated oxygen, and vastly more oxygen dissolves into your blood plasma. Simple physics, large biological effect.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="barotrauma">
+        <h3>Barotrauma</h3>
+        <div class="abbr"></div>
+        <div class="tech">
+          <p>Tissue injury caused by pressure differentials between gas-filled spaces and surrounding tissue during pressurization or depressurization. In HBOT, the primary risk is middle ear barotrauma (inability to equalize Eustachian tube pressure), followed by sinus barotrauma. Incidence varies by study (2&ndash;10% for ear discomfort); serious barotrauma (tympanic membrane rupture) is rare with proper equalization technique and controlled pressurization rates. Essentially a non-issue at 1.5 ATA with gradual pressure changes.</p>
+        </div>
+        <div class="plain">
+          <p>Pressure-related tissue damage, mostly affecting the ears. Same thing that happens on an airplane if you can't equalize, but at 1.5 ATA it's milder. Learn to equalize your ears (swallow, yawn, or pinch-and-blow) and pressurize slowly. Serious injury is very rare.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="myopia">
+        <h3>Myopia (Temporary)</h3>
+        <div class="abbr">Reversible Nearsightedness</div>
+        <div class="tech">
+          <p>Transient myopic shift caused by oxidative changes to the crystalline lens, altering its refractive index. Reported in some patients undergoing extended HBOT protocols (typically 20+ sessions). The effect is fully reversible upon cessation of treatment, usually resolving within 2&ndash;8 weeks. More common at higher pressures and with 100% O<sub>2</sub>; less likely at 1.5 ATA with 93% concentrator output. Does not represent structural damage to the eye.</p>
+        </div>
+        <div class="plain">
+          <p>A temporary change in vision (things far away get slightly blurry) that some people experience during long HBOT protocols. It goes away within a few weeks after stopping or reducing sessions. It's a lens chemistry change, not eye damage. Less common at home-chamber pressure.</p>
+        </div>
+      </div>
+
+      <div class="glossary-entry" id="ppo2">
+        <h3>ppO<sub>2</sub></h3>
+        <div class="abbr">Partial Pressure of Oxygen</div>
+        <div class="tech">
+          <p>The effective pressure exerted by oxygen in a gas mixture, calculated as total pressure multiplied by oxygen fraction (ppO<sub>2</sub> = P<sub>total</sub> &times; FiO<sub>2</sub>). At sea level breathing room air: 1.0 &times; 0.21 = 0.21 ATA. At 1.5 ATA with a 93% concentrator: 1.5 &times; 0.93 = 1.395 ATA. This is the number that determines dissolved O<sub>2</sub> via Henry's Law and the number that determines oxygen toxicity thresholds. CNS toxicity risk begins above approximately 1.6 ATA ppO<sub>2</sub>; home setups at 1.5 ATA/93% stay well below this.</p>
+        </div>
+        <div class="plain">
+          <p>How much oxygen pressure your body actually experiences, combining chamber pressure with oxygen concentration. A home setup (1.5 ATA, 93% oxygen) produces a ppO<sub>2</sub> of about 1.4&mdash;well below the ~1.6 threshold where oxygen toxicity becomes a concern. This is why home HBOT has such wide safety margins.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <p><strong>Not medical advice.</strong> Consult your physician before starting HBOT or any new therapy.</p>
+    <p>Compiled from clinical literature, February 2026. <a href="index.html">Science</a> &middot; <a href="safety.html">Safety</a> &middot; <a href="costs.html">Costs</a> &middot; <a href="glossary.html">Glossary</a></p>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var s = localStorage.getItem('hbot-mode');
+  if (s === 'mode-plain' || s === 'mode-technical') document.body.className = s;
+  var nt = document.getElementById('nav-track');
+  var nlt = document.getElementById('nav-label-tech');
+  var nlp = document.getElementById('nav-label-plain');
+  function tech() { return document.body.classList.contains('mode-technical'); }
+  function set(t) {
+    var m = t ? 'mode-technical' : 'mode-plain';
+    document.body.className = m;
+    localStorage.setItem('hbot-mode', m);
+    nt.className = t ? 'toggle-track technical' : 'toggle-track plain';
+    nlt.className = t ? 'toggle-label active' : 'toggle-label inactive';
+    nlp.className = t ? 'toggle-label inactive' : 'toggle-label active';
+  }
+  set(tech());
+  nt.onclick = function() { set(!tech()); };
+  nlt.onclick = function() { set(true); };
+  nlp.onclick = function() { set(false); };
+})();
+</script>
+
+</body>
+</html>

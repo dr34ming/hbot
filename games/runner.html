@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>O2 Runner — HBOT Science</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f1117;
+  --bg-card: #181b24;
+  --text: #d4d7e0;
+  --text-muted: #8a8f9e;
+  --text-bright: #eef0f6;
+  --accent: #4a9eab;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  touch-action: none;
+}
+
+#game-wrap {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas {
+  display: block;
+  image-rendering: auto;
+}
+
+.back-link {
+  position: fixed;
+  top: 12px;
+  left: 16px;
+  z-index: 20;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 500;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.back-link:hover { opacity: 1; color: var(--accent); }
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#overlay.active { pointer-events: auto; }
+
+#overlay .panel {
+  background: rgba(15, 17, 23, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #282c3a;
+  border-radius: 16px;
+  padding: 2.5rem 3rem;
+  text-align: center;
+  max-width: 440px;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+#overlay.active .panel { opacity: 1; transform: scale(1); }
+
+#overlay h1 {
+  font-size: 2rem;
+  color: var(--text-bright);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.3rem;
+}
+
+#overlay .o2 {
+  color: var(--accent);
+}
+
+#overlay .sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+#overlay .score-line {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+#overlay .tissue-line {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+#overlay .btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #0f1117;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.65rem 2rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn:hover { transform: scale(1.04); box-shadow: 0 0 20px rgba(74,158,171,0.3); }
+.btn:active { transform: scale(0.97); }
+
+#overlay .controls {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 1rem;
+  line-height: 1.7;
+}
+
+#overlay .milestone {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.6s;
+  pointer-events: none;
+}
+#overlay .milestone.show { opacity: 1; }
+#overlay .milestone h2 {
+  font-size: 1.3rem;
+  color: var(--text-bright);
+  margin-bottom: 0.3rem;
+}
+#overlay .milestone p {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+</style>
+</head>
+<body>
+
+<a class="back-link" href="../index.html">&larr; Back to HBOT Science</a>
+
+<div id="game-wrap">
+  <canvas id="c"></canvas>
+  <div id="overlay" class="active">
+    <div class="panel" id="panel-start">
+      <h1><span class="o2">O<sub>2</sub></span> Runner</h1>
+      <p class="sub">Navigate dissolved oxygen through the vascular system.<br>Dodge red blood cells. Squeeze through capillaries.<br>Deliver oxygen to tissues that need it.</p>
+      <button class="btn" id="btn-start">Begin Dive</button>
+      <div class="controls">
+        Arrow keys / W S / Mouse / Touch to move<br>
+        Space or P to pause
+      </div>
+    </div>
+    <div class="panel" id="panel-dead" style="display:none">
+      <h1>Absorbed</h1>
+      <div class="score-line" id="final-score">0 m</div>
+      <div class="tissue-line" id="final-tissue"></div>
+      <button class="btn" id="btn-retry">Try Again</button>
+      <div class="controls" id="final-mechanism"></div>
+    </div>
+    <div class="milestone" id="milestone-msg">
+      <h2 id="ms-title"></h2>
+      <p id="ms-desc"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// ── Canvas setup ──
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const panelStart = document.getElementById('panel-start');
+const panelDead = document.getElementById('panel-dead');
+const msMsg = document.getElementById('milestone-msg');
+const msTitle = document.getElementById('ms-title');
+const msDesc = document.getElementById('ms-desc');
+
+let W, H;
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── State ──
+const STATE = { MENU: 0, PLAYING: 1, PAUSED: 2, DEAD: 3 };
+let state = STATE.MENU;
+let distance = 0;
+let health = 100;
+let speed = 3;
+let baseSpeed = 3;
+let playerY = 0;
+let playerTargetY = 0;
+let playerX = 0;
+let invincible = 0;
+let boostTimer = 0;
+let frame = 0;
+let lastTime = 0;
+let dt = 0;
+let shakeX = 0, shakeY = 0;
+let shakeTimer = 0;
+
+// Input
+let inputUp = false, inputDown = false;
+let mouseY = -1;
+let touchActive = false;
+
+// Trail
+const trail = [];
+const MAX_TRAIL = 28;
+
+// Obstacles & power-ups
+let obstacles = [];
+let powerups = [];
+let particles = [];
+let wallSegments = [];
+let bgLayers = [];
+
+// Vessel parameters
+let wallTop = 0;
+let wallBot = 0;
+let wallTargetTop = 0;
+let wallTargetBot = 0;
+
+// Milestones
+const ZONES = [
+  { dist: 0,    name: 'Large Artery',       desc: 'Wide open. Easy breathing.',                    wallPct: 0.28, color: [180, 40, 40] },
+  { dist: 500,  name: 'Smaller Vessels',     desc: 'Narrowing. Watch for red blood cells.',         wallPct: 0.32, color: [160, 45, 50] },
+  { dist: 1000, name: 'Capillary Bed',       desc: 'Tight quarters. Squeeze through.',              wallPct: 0.38, color: [140, 50, 55] },
+  { dist: 1500, name: 'Brain Vasculature',   desc: 'NF-kB suppression reducing neuroinflammation.', wallPct: 0.36, color: [130, 45, 65] },
+  { dist: 2000, name: 'Damaged Tissue Zone', desc: 'HIF-1a activated. Angiogenesis triggered.',     wallPct: 0.34, color: [120, 55, 70] },
+];
+
+const MECHANISMS = [
+  { dist: 500,  text: 'ROS Signaling active — antioxidant enzymes upregulating' },
+  { dist: 1000, text: 'Stem cells mobilizing from bone marrow — CD34+ cells in circulation' },
+  { dist: 1500, text: 'NF-kB suppression — inflammatory cytokines decreasing' },
+  { dist: 2000, text: 'HIF-1a paradox triggered — VEGF driving new vessel growth' },
+  { dist: 2500, text: 'Telomere protection pathways engaging' },
+];
+
+let currentZone = 0;
+let shownMilestones = new Set();
+let milestoneTimer = 0;
+
+// ── Helpers ──
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
+function randInt(lo, hi) { return Math.floor(rand(lo, hi + 1)); }
+
+function getZone() {
+  for (let i = ZONES.length - 1; i >= 0; i--) {
+    if (distance >= ZONES[i].dist) return i;
+  }
+  return 0;
+}
+
+function getZoneColor() {
+  const z = ZONES[getZone()];
+  return z.color;
+}
+
+// ── Wall generation ──
+function initWalls() {
+  wallSegments = [];
+  const zone = ZONES[0];
+  wallTop = H * (zone.wallPct * 0.5);
+  wallBot = H - wallTop;
+  wallTargetTop = wallTop;
+  wallTargetBot = wallBot;
+  for (let x = 0; x < W + 200; x += 20) {
+    wallSegments.push({
+      x: x,
+      topY: wallTop + Math.sin(x * 0.008) * 15 + Math.sin(x * 0.023) * 8,
+      botY: wallBot + Math.sin(x * 0.01 + 2) * 15 + Math.sin(x * 0.019 + 1) * 8,
+    });
+  }
+}
+
+function updateWalls() {
+  const zi = getZone();
+  const zone = ZONES[zi];
+  const targetTop = H * (zone.wallPct * 0.5);
+  const targetBot = H - targetTop;
+  wallTargetTop = lerp(wallTargetTop, targetTop, 0.002);
+  wallTargetBot = lerp(wallTargetBot, targetBot, 0.002);
+  wallTop = wallTargetTop;
+  wallBot = wallTargetBot;
+
+  // Scroll walls left
+  const spd = speed * 60 * dt;
+  for (let s of wallSegments) { s.x -= spd; }
+
+  // Remove segments that went off-screen, add new ones
+  while (wallSegments.length > 0 && wallSegments[0].x < -40) {
+    wallSegments.shift();
+  }
+  while (wallSegments.length === 0 || wallSegments[wallSegments.length - 1].x < W + 200) {
+    const lastX = wallSegments.length > 0 ? wallSegments[wallSegments.length - 1].x : 0;
+    const nx = lastX + 20;
+    const phase = (distance * 2 + nx) * 0.01;
+    wallSegments.push({
+      x: nx,
+      topY: wallTop + Math.sin(phase * 0.8) * 18 + Math.sin(phase * 2.3) * 10 + Math.sin(phase * 0.3) * 6,
+      botY: wallBot + Math.sin(phase * 1.0 + 2) * 18 + Math.sin(phase * 1.9 + 1) * 10 + Math.sin(phase * 0.4 + 3) * 6,
+    });
+  }
+}
+
+// ── BG layers (parallax) ──
+function initBG() {
+  bgLayers = [];
+  for (let layer = 0; layer < 3; layer++) {
+    const dots = [];
+    for (let i = 0; i < 40; i++) {
+      dots.push({
+        x: rand(0, W),
+        y: rand(0, H),
+        r: rand(1, 3 - layer * 0.5),
+        a: rand(0.03, 0.08 + layer * 0.02),
+      });
+    }
+    bgLayers.push({ speed: 0.3 + layer * 0.3, dots });
+  }
+}
+
+function updateBG() {
+  const spd = speed * 60 * dt;
+  for (let layer of bgLayers) {
+    for (let d of layer.dots) {
+      d.x -= spd * layer.speed * 0.3;
+      if (d.x < -10) { d.x = W + 10; d.y = rand(0, H); }
+    }
+  }
+}
+
+function drawBG() {
+  for (let layer of bgLayers) {
+    for (let d of layer.dots) {
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(74, 158, 171, ${d.a})`;
+      ctx.fill();
+    }
+  }
+}
+
+// ── Obstacle spawn ──
+let spawnTimer = 0;
+let narrowTimer = 0;
+let inflameTimer = 0;
+
+function spawnObstacle() {
+  const zi = getZone();
+  const playTop = wallTop + 30;
+  const playBot = wallBot - 30;
+
+  const roll = Math.random();
+
+  if (roll < 0.45) {
+    // Red blood cell
+    const r = rand(22, 38 + zi * 3);
+    obstacles.push({
+      type: 'rbc',
+      x: W + r + 20,
+      y: rand(playTop + r, playBot - r),
+      r: r,
+      vx: rand(-0.5, 0.5),
+      vy: rand(-0.3, 0.3),
+      rotation: rand(0, Math.PI * 2),
+      rotSpeed: rand(-0.02, 0.02),
+    });
+  } else if (roll < 0.65) {
+    // Blood clot
+    const r = rand(30, 50);
+    obstacles.push({
+      type: 'clot',
+      x: W + r + 20,
+      y: rand(playTop + r, playBot - r),
+      r: r,
+      blobs: Array.from({length: randInt(4, 7)}, () => ({
+        ox: rand(-r * 0.5, r * 0.5),
+        oy: rand(-r * 0.5, r * 0.5),
+        r: rand(r * 0.3, r * 0.6),
+      })),
+    });
+  } else if (roll < 0.8 && zi >= 1) {
+    // Narrow section (capillary squeeze)
+    const squeeze = rand(0.12, 0.22 + zi * 0.03);
+    const gapCenter = rand(playTop + 60, playBot - 60);
+    const gapHalf = rand(35, 55 - zi * 4);
+    obstacles.push({
+      type: 'narrow',
+      x: W + 20,
+      width: rand(120, 200),
+      gapCenter: gapCenter,
+      gapHalf: Math.max(gapHalf, 24),
+      passed: false,
+    });
+  } else if (zi >= 3) {
+    // Inflammation zone
+    const playH = playBot - playTop;
+    obstacles.push({
+      type: 'inflame',
+      x: W + 20,
+      y: rand(playTop, playBot),
+      w: rand(100, 200),
+      h: rand(60, 120),
+      pulse: 0,
+    });
+  } else {
+    // Default: another RBC
+    const r = rand(20, 35);
+    obstacles.push({
+      type: 'rbc',
+      x: W + r + 20,
+      y: rand(playTop + r, playBot - r),
+      r: r,
+      vx: rand(-0.5, 0.5),
+      vy: rand(-0.3, 0.3),
+      rotation: rand(0, Math.PI * 2),
+      rotSpeed: rand(-0.02, 0.02),
+    });
+  }
+}
+
+// ── Power-up spawn ──
+let puTimer = 0;
+
+function spawnPowerup() {
+  const playTop = wallTop + 40;
+  const playBot = wallBot - 40;
+  const types = ['boost', 'vegf', 'hif', 'heal'];
+  const weights = [0.3, 0.25, 0.2, 0.25];
+  let r = Math.random(), acc = 0, type = 'boost';
+  for (let i = 0; i < types.length; i++) {
+    acc += weights[i];
+    if (r < acc) { type = types[i]; break; }
+  }
+  powerups.push({
+    type: type,
+    x: W + 20,
+    y: rand(playTop, playBot),
+    r: 12,
+    pulse: rand(0, Math.PI * 2),
+    active: true,
+  });
+}
+
+// ── Particles ──
+function emitParticle(x, y, color, count, spread) {
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: x, y: y,
+      vx: rand(-spread, spread),
+      vy: rand(-spread, spread),
+      life: 1,
+      decay: rand(0.015, 0.04),
+      r: rand(2, 5),
+      color: color,
+    });
+  }
+}
+
+// ── Player ──
+function initPlayer() {
+  playerX = W * 0.15;
+  playerY = H * 0.5;
+  playerTargetY = playerY;
+  health = 100;
+  invincible = 0;
+  boostTimer = 0;
+  trail.length = 0;
+}
+
+function updatePlayer() {
+  const playTop = getWallTopAt(playerX) + 14;
+  const playBot = getWallBotAt(playerX) - 14;
+
+  // Input
+  if (touchActive || mouseY >= 0) {
+    playerTargetY = mouseY;
+  } else {
+    const moveSpeed = 400 * dt;
+    if (inputUp) playerTargetY -= moveSpeed;
+    if (inputDown) playerTargetY += moveSpeed;
+  }
+
+  playerTargetY = clamp(playerTargetY, playTop, playBot);
+  playerY = lerp(playerY, playerTargetY, 0.12);
+  playerY = clamp(playerY, playTop, playBot);
+
+  // Trail
+  trail.unshift({ x: playerX, y: playerY });
+  if (trail.length > MAX_TRAIL) trail.pop();
+
+  // Invincibility decay
+  if (invincible > 0) invincible -= dt;
+  if (boostTimer > 0) {
+    boostTimer -= dt;
+    if (boostTimer <= 0) speed = baseSpeed;
+  }
+
+  // Wall collision
+  const wTop = getWallTopAt(playerX);
+  const wBot = getWallBotAt(playerX);
+  if (playerY - 10 < wTop || playerY + 10 > wBot) {
+    if (invincible <= 0) {
+      health -= 30 * dt;
+      shakeTimer = 0.1;
+    }
+  }
+}
+
+function getWallTopAt(x) {
+  for (let i = 0; i < wallSegments.length - 1; i++) {
+    if (wallSegments[i].x <= x && wallSegments[i + 1].x > x) {
+      const t = (x - wallSegments[i].x) / (wallSegments[i + 1].x - wallSegments[i].x);
+      return lerp(wallSegments[i].topY, wallSegments[i + 1].topY, t);
+    }
+  }
+  return wallTop;
+}
+
+function getWallBotAt(x) {
+  for (let i = 0; i < wallSegments.length - 1; i++) {
+    if (wallSegments[i].x <= x && wallSegments[i + 1].x > x) {
+      const t = (x - wallSegments[i].x) / (wallSegments[i + 1].x - wallSegments[i].x);
+      return lerp(wallSegments[i].botY, wallSegments[i + 1].botY, t);
+    }
+  }
+  return wallBot;
+}
+
+// ── Collision ──
+function checkCollisions() {
+  const px = playerX, py = playerY, pr = 10;
+
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    const o = obstacles[i];
+
+    if (o.type === 'rbc') {
+      const dx = px - o.x, dy = py - o.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < pr + o.r - 4) {
+        if (invincible <= 0) {
+          health -= 25;
+          shakeTimer = 0.15;
+          emitParticle(px, py, 'rgba(200,50,50,0.8)', 8, 3);
+          obstacles.splice(i, 1);
+        } else {
+          emitParticle(o.x, o.y, 'rgba(74,158,171,0.8)', 12, 4);
+          obstacles.splice(i, 1);
+        }
+      }
+    }
+
+    else if (o.type === 'clot') {
+      const dx = px - o.x, dy = py - o.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < pr + o.r * 0.7) {
+        if (invincible <= 0) {
+          health -= 40;
+          shakeTimer = 0.2;
+          emitParticle(px, py, 'rgba(80,30,30,0.9)', 12, 3);
+          obstacles.splice(i, 1);
+        } else {
+          emitParticle(o.x, o.y, 'rgba(74,158,171,0.8)', 15, 5);
+          obstacles.splice(i, 1);
+        }
+      }
+    }
+
+    else if (o.type === 'narrow') {
+      if (px > o.x && px < o.x + o.width) {
+        if (py - pr < o.gapCenter - o.gapHalf || py + pr > o.gapCenter + o.gapHalf) {
+          if (invincible <= 0) {
+            health -= 50 * dt;
+            shakeTimer = 0.1;
+          }
+        }
+        if (!o.passed && px > o.x + o.width * 0.5) {
+          o.passed = true;
+          emitParticle(px, py, 'rgba(74,200,120,0.7)', 6, 2);
+        }
+      }
+    }
+
+    else if (o.type === 'inflame') {
+      if (px + pr > o.x && px - pr < o.x + o.w &&
+          py + pr > o.y - o.h * 0.5 && py - pr < o.y + o.h * 0.5) {
+        if (invincible <= 0) {
+          health -= 20 * dt;
+          speed = Math.max(baseSpeed * 0.6, speed - 0.5 * dt);
+        }
+      }
+    }
+  }
+
+  // Power-ups
+  for (let i = powerups.length - 1; i >= 0; i--) {
+    const p = powerups[i];
+    if (!p.active) continue;
+    const dx = px - p.x, dy = py - p.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < pr + p.r + 4) {
+      p.active = false;
+      applyPowerup(p);
+      powerups.splice(i, 1);
+    }
+  }
+}
+
+function applyPowerup(p) {
+  if (p.type === 'boost') {
+    // Pressure Boost: speed + invincibility
+    boostTimer = 3;
+    invincible = 3;
+    speed = baseSpeed * 1.5;
+    emitParticle(playerX, playerY, 'rgba(80,160,255,0.9)', 20, 5);
+  } else if (p.type === 'vegf') {
+    // VEGF Signal: widen next narrow
+    for (let o of obstacles) {
+      if (o.type === 'narrow' && o.x > playerX) {
+        o.gapHalf = Math.min(o.gapHalf * 1.8, 90);
+        emitParticle(o.x + o.width * 0.5, o.gapCenter, 'rgba(60,200,100,0.8)', 15, 4);
+        break;
+      }
+    }
+    emitParticle(playerX, playerY, 'rgba(60,200,100,0.9)', 12, 4);
+  } else if (p.type === 'hif') {
+    // HIF-1a: bonus points
+    distance += 50;
+    emitParticle(playerX, playerY, 'rgba(160,80,220,0.9)', 20, 5);
+  } else if (p.type === 'heal') {
+    // Concentrator Surge: heal
+    health = Math.min(100, health + 30);
+    emitParticle(playerX, playerY, 'rgba(255,255,255,0.9)', 15, 4);
+  }
+}
+
+// ── Update ──
+function update() {
+  if (state !== STATE.PLAYING) return;
+
+  // Speed progression
+  baseSpeed = 3 + distance * 0.0005;
+  if (boostTimer <= 0) speed = baseSpeed;
+
+  // Distance
+  distance += speed * 60 * dt * 0.4;
+
+  // Walls
+  updateWalls();
+
+  // BG
+  updateBG();
+
+  // Player
+  updatePlayer();
+
+  // Move obstacles
+  const spd = speed * 60 * dt;
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    const o = obstacles[i];
+    if (o.type === 'rbc') {
+      o.x -= spd + (o.vx || 0);
+      o.y += (o.vy || 0);
+      o.rotation += o.rotSpeed || 0;
+      // Bounce off walls
+      const wt = getWallTopAt(o.x) + o.r;
+      const wb = getWallBotAt(o.x) - o.r;
+      if (o.y < wt) { o.y = wt; o.vy = Math.abs(o.vy); }
+      if (o.y > wb) { o.y = wb; o.vy = -Math.abs(o.vy); }
+    } else if (o.type === 'clot') {
+      o.x -= spd;
+    } else if (o.type === 'narrow') {
+      o.x -= spd;
+    } else if (o.type === 'inflame') {
+      o.x -= spd;
+      o.pulse += dt * 3;
+    }
+    // Remove off-screen
+    if (o.x < -200 || (o.type === 'narrow' && o.x + o.width < -50)) {
+      obstacles.splice(i, 1);
+    }
+  }
+
+  // Move power-ups
+  for (let i = powerups.length - 1; i >= 0; i--) {
+    powerups[i].x -= spd;
+    powerups[i].pulse += dt * 4;
+    if (powerups[i].x < -30) powerups.splice(i, 1);
+  }
+
+  // Particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= p.decay;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+
+  // Collisions
+  checkCollisions();
+
+  // Spawn obstacles
+  const zi = getZone();
+  const spawnRate = Math.max(0.4, 1.2 - zi * 0.15 - distance * 0.00005);
+  spawnTimer -= dt;
+  if (spawnTimer <= 0) {
+    spawnObstacle();
+    spawnTimer = spawnRate + rand(-0.2, 0.2);
+  }
+
+  // Spawn power-ups
+  puTimer -= dt;
+  if (puTimer <= 0) {
+    spawnPowerup();
+    puTimer = rand(4, 8 - zi * 0.5);
+  }
+
+  // Shake
+  if (shakeTimer > 0) {
+    shakeTimer -= dt;
+    shakeX = rand(-3, 3);
+    shakeY = rand(-3, 3);
+  } else {
+    shakeX = 0; shakeY = 0;
+  }
+
+  // Milestones
+  for (let m of MECHANISMS) {
+    if (distance >= m.dist && !shownMilestones.has(m.dist)) {
+      shownMilestones.add(m.dist);
+      showMilestone(ZONES[getZone()].name, m.text);
+    }
+  }
+  if (milestoneTimer > 0) {
+    milestoneTimer -= dt;
+    if (milestoneTimer <= 0) msMsg.classList.remove('show');
+  }
+
+  // Death
+  if (health <= 0) {
+    health = 0;
+    die();
+  }
+}
+
+function showMilestone(title, desc) {
+  msTitle.textContent = title;
+  msDesc.textContent = desc;
+  msMsg.classList.add('show');
+  milestoneTimer = 3;
+}
+
+function die() {
+  state = STATE.DEAD;
+  overlay.classList.add('active');
+  panelStart.style.display = 'none';
+  panelDead.style.display = 'block';
+  document.getElementById('final-score').textContent = Math.floor(distance) + ' m';
+
+  const zi = getZone();
+  const tissue = ZONES[zi];
+  document.getElementById('final-tissue').textContent = 'Reached: ' + tissue.name;
+
+  // Find last activated mechanism
+  let lastMech = '';
+  for (let m of MECHANISMS) {
+    if (distance >= m.dist) lastMech = m.text;
+  }
+  document.getElementById('final-mechanism').textContent = lastMech || 'Keep going to activate biological mechanisms.';
+}
+
+// ── Draw ──
+function draw() {
+  ctx.save();
+  ctx.translate(shakeX, shakeY);
+
+  // Clear
+  ctx.fillStyle = '#0f1117';
+  ctx.fillRect(-5, -5, W + 10, H + 10);
+
+  // BG dots
+  drawBG();
+
+  // Vessel walls
+  drawWalls();
+
+  // Inflammation zones (behind other obstacles)
+  for (let o of obstacles) {
+    if (o.type === 'inflame') drawInflammation(o);
+  }
+
+  // Narrow sections
+  for (let o of obstacles) {
+    if (o.type === 'narrow') drawNarrow(o);
+  }
+
+  // Blood clots
+  for (let o of obstacles) {
+    if (o.type === 'clot') drawClot(o);
+  }
+
+  // RBCs
+  for (let o of obstacles) {
+    if (o.type === 'rbc') drawRBC(o);
+  }
+
+  // Power-ups
+  for (let p of powerups) {
+    if (p.active) drawPowerup(p);
+  }
+
+  // Particles
+  for (let p of particles) {
+    ctx.globalAlpha = p.life;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Player trail
+  drawTrail();
+
+  // Player
+  drawPlayer();
+
+  // HUD
+  drawHUD();
+
+  ctx.restore();
+}
+
+function drawWalls() {
+  if (wallSegments.length < 2) return;
+
+  const zc = getZoneColor();
+
+  // Top wall
+  ctx.beginPath();
+  ctx.moveTo(wallSegments[0].x, 0);
+  for (let s of wallSegments) {
+    ctx.lineTo(s.x, s.topY);
+  }
+  ctx.lineTo(wallSegments[wallSegments.length - 1].x, 0);
+  ctx.closePath();
+
+  let grad = ctx.createLinearGradient(0, 0, 0, wallTop + 30);
+  grad.addColorStop(0, `rgba(${zc[0]}, ${zc[1]}, ${zc[2]}, 0.4)`);
+  grad.addColorStop(1, `rgba(${zc[0]}, ${zc[1]}, ${zc[2]}, 0.08)`);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Top wall edge glow
+  ctx.beginPath();
+  for (let i = 0; i < wallSegments.length; i++) {
+    const s = wallSegments[i];
+    if (i === 0) ctx.moveTo(s.x, s.topY);
+    else ctx.lineTo(s.x, s.topY);
+  }
+  ctx.strokeStyle = `rgba(${zc[0]+40}, ${zc[1]+20}, ${zc[2]+20}, 0.35)`;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Bottom wall
+  ctx.beginPath();
+  ctx.moveTo(wallSegments[0].x, H);
+  for (let s of wallSegments) {
+    ctx.lineTo(s.x, s.botY);
+  }
+  ctx.lineTo(wallSegments[wallSegments.length - 1].x, H);
+  ctx.closePath();
+
+  grad = ctx.createLinearGradient(0, H, 0, wallBot - 30);
+  grad.addColorStop(0, `rgba(${zc[0]}, ${zc[1]}, ${zc[2]}, 0.4)`);
+  grad.addColorStop(1, `rgba(${zc[0]}, ${zc[1]}, ${zc[2]}, 0.08)`);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Bottom wall edge glow
+  ctx.beginPath();
+  for (let i = 0; i < wallSegments.length; i++) {
+    const s = wallSegments[i];
+    if (i === 0) ctx.moveTo(s.x, s.botY);
+    else ctx.lineTo(s.x, s.botY);
+  }
+  ctx.strokeStyle = `rgba(${zc[0]+40}, ${zc[1]+20}, ${zc[2]+20}, 0.35)`;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function drawRBC(o) {
+  ctx.save();
+  ctx.translate(o.x, o.y);
+  ctx.rotate(o.rotation);
+
+  // Disc shape (biconcave - drawn as ellipse with inner shadow)
+  ctx.beginPath();
+  ctx.ellipse(0, 0, o.r, o.r * 0.55, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(140, 30, 30, 0.7)';
+  ctx.fill();
+
+  // Inner dimple
+  ctx.beginPath();
+  ctx.ellipse(0, 0, o.r * 0.5, o.r * 0.28, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(100, 20, 20, 0.5)';
+  ctx.fill();
+
+  // Edge highlight
+  ctx.beginPath();
+  ctx.ellipse(0, 0, o.r, o.r * 0.55, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(180, 50, 50, 0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawClot(o) {
+  for (let b of o.blobs) {
+    ctx.beginPath();
+    ctx.arc(o.x + b.ox, o.y + b.oy, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(50, 15, 15, 0.85)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(80, 25, 25, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+function drawNarrow(o) {
+  const grad1 = ctx.createLinearGradient(o.x, 0, o.x + o.width, 0);
+  grad1.addColorStop(0, 'rgba(120, 50, 50, 0)');
+  grad1.addColorStop(0.3, 'rgba(120, 50, 50, 0.5)');
+  grad1.addColorStop(0.7, 'rgba(120, 50, 50, 0.5)');
+  grad1.addColorStop(1, 'rgba(120, 50, 50, 0)');
+
+  // Top squeeze
+  ctx.fillStyle = grad1;
+  ctx.fillRect(o.x, 0, o.width, o.gapCenter - o.gapHalf);
+
+  // Bottom squeeze
+  ctx.fillRect(o.x, o.gapCenter + o.gapHalf, o.width, H - (o.gapCenter + o.gapHalf));
+
+  // Gap edges glow
+  ctx.strokeStyle = 'rgba(180, 80, 80, 0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(o.x, o.gapCenter - o.gapHalf);
+  ctx.lineTo(o.x + o.width, o.gapCenter - o.gapHalf);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(o.x, o.gapCenter + o.gapHalf);
+  ctx.lineTo(o.x + o.width, o.gapCenter + o.gapHalf);
+  ctx.stroke();
+}
+
+function drawInflammation(o) {
+  const pulse = 0.5 + Math.sin(o.pulse) * 0.3;
+  const grad = ctx.createRadialGradient(
+    o.x + o.w * 0.5, o.y, 0,
+    o.x + o.w * 0.5, o.y, Math.max(o.w, o.h) * 0.7
+  );
+  grad.addColorStop(0, `rgba(220, 100, 30, ${0.25 * pulse})`);
+  grad.addColorStop(0.5, `rgba(200, 60, 20, ${0.15 * pulse})`);
+  grad.addColorStop(1, 'rgba(200, 60, 20, 0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(o.x - 20, o.y - o.h, o.w + 40, o.h * 2);
+}
+
+function drawPowerup(p) {
+  const pulse = 1 + Math.sin(p.pulse) * 0.2;
+  const r = p.r * pulse;
+  let color, glowColor;
+
+  if (p.type === 'boost') {
+    color = 'rgba(80, 160, 255, 0.9)';
+    glowColor = 'rgba(80, 160, 255, 0.3)';
+  } else if (p.type === 'vegf') {
+    color = 'rgba(60, 200, 100, 0.9)';
+    glowColor = 'rgba(60, 200, 100, 0.3)';
+  } else if (p.type === 'hif') {
+    color = 'rgba(160, 80, 220, 0.9)';
+    glowColor = 'rgba(160, 80, 220, 0.3)';
+  } else {
+    color = 'rgba(255, 255, 255, 0.9)';
+    glowColor = 'rgba(255, 255, 255, 0.3)';
+  }
+
+  // Glow
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, r * 2, 0, Math.PI * 2);
+  ctx.fillStyle = glowColor;
+  ctx.fill();
+
+  // Core
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // Inner bright
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, r * 0.4, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fill();
+}
+
+function drawTrail() {
+  if (trail.length < 2) return;
+  for (let i = 1; i < trail.length; i++) {
+    const t = 1 - i / trail.length;
+    const alpha = t * 0.5;
+    const rad = 8 * t;
+    if (invincible > 0) {
+      ctx.beginPath();
+      ctx.arc(trail[i].x, trail[i].y, rad + 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(80, 200, 255, ${alpha * 0.5})`;
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(trail[i].x, trail[i].y, rad, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(180, 220, 255, ${alpha})`;
+    ctx.fill();
+  }
+}
+
+function drawPlayer() {
+  const px = playerX, py = playerY;
+  const pulse = 1 + Math.sin(frame * 0.08) * 0.1;
+
+  // Outer glow
+  const glowR = 28 * pulse;
+  const glow = ctx.createRadialGradient(px, py, 0, px, py, glowR);
+  if (invincible > 0) {
+    glow.addColorStop(0, 'rgba(80, 200, 255, 0.4)');
+    glow.addColorStop(0.5, 'rgba(80, 200, 255, 0.15)');
+    glow.addColorStop(1, 'rgba(80, 200, 255, 0)');
+  } else {
+    glow.addColorStop(0, 'rgba(180, 220, 255, 0.35)');
+    glow.addColorStop(0.5, 'rgba(180, 220, 255, 0.1)');
+    glow.addColorStop(1, 'rgba(180, 220, 255, 0)');
+  }
+  ctx.beginPath();
+  ctx.arc(px, py, glowR, 0, Math.PI * 2);
+  ctx.fillStyle = glow;
+  ctx.fill();
+
+  // Core molecule
+  ctx.beginPath();
+  ctx.arc(px, py, 10 * pulse, 0, Math.PI * 2);
+  if (invincible > 0) {
+    ctx.fillStyle = 'rgba(80, 200, 255, 0.95)';
+  } else {
+    ctx.fillStyle = 'rgba(200, 230, 255, 0.95)';
+  }
+  ctx.fill();
+
+  // Bright center
+  ctx.beginPath();
+  ctx.arc(px, py, 5 * pulse, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.fill();
+
+  // Label
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = `bold 7px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('O\u2082', px, py + 2.5);
+}
+
+function drawHUD() {
+  // Distance
+  ctx.fillStyle = 'rgba(238, 240, 246, 0.85)';
+  ctx.font = `600 16px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.textAlign = 'right';
+  ctx.fillText(Math.floor(distance) + ' m', W - 20, 32);
+
+  // Zone name
+  const zi = getZone();
+  ctx.fillStyle = 'rgba(138, 143, 158, 0.7)';
+  ctx.font = `500 11px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.fillText(ZONES[zi].name, W - 20, 50);
+
+  // Health bar background
+  const hbW = 160, hbH = 6, hbX = W - 20 - hbW, hbY = 58;
+  ctx.fillStyle = 'rgba(40, 44, 58, 0.7)';
+  ctx.beginPath();
+  ctx.roundRect(hbX, hbY, hbW, hbH, 3);
+  ctx.fill();
+
+  // Health bar fill
+  const hPct = clamp(health / 100, 0, 1);
+  let hColor;
+  if (health > 60) hColor = 'rgba(74, 158, 171, 0.9)';
+  else if (health > 30) hColor = 'rgba(196, 145, 58, 0.9)';
+  else hColor = 'rgba(200, 60, 50, 0.9)';
+  ctx.fillStyle = hColor;
+  ctx.beginPath();
+  ctx.roundRect(hbX, hbY, hbW * hPct, hbH, 3);
+  ctx.fill();
+
+  // Boost indicator
+  if (boostTimer > 0) {
+    ctx.fillStyle = 'rgba(80, 160, 255, 0.8)';
+    ctx.font = `600 11px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.textAlign = 'right';
+    ctx.fillText('PRESSURE BOOST ' + boostTimer.toFixed(1) + 's', W - 20, 82);
+  }
+
+  // Pause hint
+  if (state === STATE.PAUSED) {
+    ctx.fillStyle = 'rgba(15, 17, 23, 0.6)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(238, 240, 246, 0.9)';
+    ctx.font = `600 24px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('PAUSED', W * 0.5, H * 0.5);
+    ctx.fillStyle = 'rgba(138, 143, 158, 0.7)';
+    ctx.font = `500 14px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.fillText('Press Space or P to resume', W * 0.5, H * 0.5 + 30);
+  }
+}
+
+// ── Game loop ──
+function loop(time) {
+  requestAnimationFrame(loop);
+  if (lastTime === 0) { lastTime = time; return; }
+  dt = Math.min((time - lastTime) / 1000, 0.05);
+  lastTime = time;
+  frame++;
+
+  if (state === STATE.PLAYING) {
+    update();
+  }
+  if (state === STATE.PLAYING || state === STATE.PAUSED || state === STATE.DEAD) {
+    draw();
+  }
+}
+
+// ── Reset ──
+function reset() {
+  distance = 0;
+  health = 100;
+  speed = 3;
+  baseSpeed = 3;
+  invincible = 0;
+  boostTimer = 0;
+  frame = 0;
+  lastTime = 0;
+  obstacles = [];
+  powerups = [];
+  particles = [];
+  spawnTimer = 0.8;
+  puTimer = 3;
+  shakeTimer = 0;
+  shakeX = 0; shakeY = 0;
+  shownMilestones = new Set();
+  milestoneTimer = 0;
+  currentZone = 0;
+  msMsg.classList.remove('show');
+  initWalls();
+  initBG();
+  initPlayer();
+}
+
+// ── Start / Restart ──
+function startGame() {
+  reset();
+  state = STATE.PLAYING;
+  overlay.classList.remove('active');
+  panelStart.style.display = 'none';
+  panelDead.style.display = 'none';
+}
+
+document.getElementById('btn-start').addEventListener('click', startGame);
+document.getElementById('btn-retry').addEventListener('click', startGame);
+
+// ── Input ──
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { inputUp = true; e.preventDefault(); }
+  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { inputDown = true; e.preventDefault(); }
+  if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
+    e.preventDefault();
+    if (state === STATE.PLAYING) state = STATE.PAUSED;
+    else if (state === STATE.PAUSED) state = STATE.PLAYING;
+    else if (state === STATE.MENU) startGame();
+  }
+});
+
+document.addEventListener('keyup', function(e) {
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') inputUp = false;
+  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') inputDown = false;
+});
+
+canvas.addEventListener('mousemove', function(e) {
+  if (state === STATE.PLAYING) {
+    mouseY = e.clientY;
+    touchActive = false;
+  }
+});
+
+canvas.addEventListener('mouseleave', function() {
+  mouseY = -1;
+});
+
+canvas.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  if (state === STATE.MENU) { startGame(); return; }
+  if (state === STATE.DEAD) { startGame(); return; }
+  touchActive = true;
+  mouseY = e.touches[0].clientY;
+}, { passive: false });
+
+canvas.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+  if (state === STATE.PLAYING && e.touches.length > 0) {
+    mouseY = e.touches[0].clientY;
+    touchActive = true;
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  touchActive = false;
+  mouseY = -1;
+}, { passive: false });
+
+// ── Init ──
+initWalls();
+initBG();
+initPlayer();
+
+// Draw initial idle frame
+function drawIdle() {
+  ctx.fillStyle = '#0f1117';
+  ctx.fillRect(0, 0, W, H);
+  drawBG();
+  drawWalls();
+
+  // Slowly scroll walls for ambiance
+  const spd = 1;
+  for (let s of wallSegments) s.x -= spd * 0.016 * 60;
+  while (wallSegments.length > 0 && wallSegments[0].x < -40) wallSegments.shift();
+  while (wallSegments.length === 0 || wallSegments[wallSegments.length - 1].x < W + 200) {
+    const lastX = wallSegments.length > 0 ? wallSegments[wallSegments.length - 1].x : 0;
+    const nx = lastX + 20;
+    const phase = nx * 0.01;
+    wallSegments.push({
+      x: nx,
+      topY: wallTop + Math.sin(phase * 0.8) * 18 + Math.sin(phase * 2.3) * 10,
+      botY: wallBot + Math.sin(phase * 1.0 + 2) * 18 + Math.sin(phase * 1.9 + 1) * 10,
+    });
+  }
+  updateBG();
+}
+
+// Ambient loop for menu
+function menuLoop(time) {
+  if (state !== STATE.MENU) return;
+  drawIdle();
+  requestAnimationFrame(menuLoop);
+}
+requestAnimationFrame(menuLoop);
+
+// Main game loop
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBOT Science</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-technical">
+
+<!-- ── Sticky Nav ── -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <div class="nav-links">
+      <a href="#what">What</a>
+      <a href="#mechanisms">Mechanisms</a>
+      <a href="#dose">Dose</a>
+      <a href="#expect">Expect</a>
+      <a href="#compare">Compare</a>
+      <a href="#refs">Refs</a>
+      <div class="nav-divider"></div>
+      <a href="safety.html">Safety</a>
+      <a href="costs.html">Costs</a>
+      <a href="glossary.html">Glossary</a>
+    </div>
+    <div class="toggle-wrap" id="nav-toggle">
+      <span class="toggle-label active" id="nav-label-tech">Technical</span>
+      <div class="toggle-track technical" id="nav-track">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label inactive" id="nav-label-plain">Plain English</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<header class="hero">
+  <div class="container">
+    <h1>Hyperbaric Oxygen Therapy</h1>
+    <p class="subtitle">Eight biological mechanisms, the clinical evidence for each, and what works at home-chamber pressure. February 2026.</p>
+    <div class="hero-toggle">
+      <span class="toggle-label" id="hero-label-tech">Technical</span>
+      <div class="toggle-track technical" id="hero-track">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label" id="hero-label-plain">Plain English</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── What It Is ── -->
+<section id="what">
+  <div class="container">
+    <h2>What It Is</h2>
+
+    <div class="tech">
+      <p>Hyperbaric oxygen therapy means breathing concentrated oxygen at elevated atmospheric pressure inside a sealed chamber. The pressure forces O<sub>2</sub> to dissolve directly into <a class="term" href="glossary.html#plasma">blood plasma</a>, cerebrospinal fluid, and <a class="term" href="glossary.html#interstitial-fluid">interstitial fluid</a>&mdash;reaching tissue that <a class="term" href="glossary.html#hemoglobin">hemoglobin</a>-bound oxygen in red blood cells physically cannot access through damaged or narrowed capillaries.</p>
+      <p>At sea level breathing room air, dissolved plasma O<sub>2</sub> is roughly <span class="stat">0.3 mL/dL</span>. At <a class="term" href="glossary.html#ata">1.5 ATA</a> with 93% O<sub>2</sub> from a <a class="term" href="glossary.html#concentrator">concentrator</a>, it jumps to <span class="stat">3.1 mL/dL</span>&mdash;a <strong>10x increase</strong>. Hemoglobin is already 97&ndash;99% saturated at sea level; you can't load more onto red blood cells. The entire HBOT effect comes from dissolved plasma oxygen.</p>
+    </div>
+
+    <div class="plain">
+      <p>HBOT means sitting in a pressurized chamber and breathing concentrated oxygen. The pressure does something your lungs alone can't: it forces oxygen to dissolve directly into your <a class="term" href="glossary.html#plasma">blood plasma</a>, letting it reach tissues that your red blood cells can't squeeze into&mdash;areas with damaged or narrowed blood vessels.</p>
+      <p>The result: roughly <strong>10x more oxygen reaching your tissues</strong> than normal breathing. Your red blood cells are already maxed out at sea level&mdash;HBOT works by a completely different delivery route.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 8 Mechanisms ── -->
+<section id="mechanisms">
+  <div class="container">
+    <h2>The Eight Mechanisms</h2>
+    <p class="section-intro">
+      <span class="tech">How HBOT produces its effects, with the evidence for each. <span class="badge badge-home">Home 1.5 ATA</span> means the mechanism is active at home-chamber pressure. <span class="badge badge-clinical">Clinical 2.0+ ATA</span> means it's only been demonstrated at clinical pressure so far.</span>
+      <span class="plain">What HBOT actually does in your body. Green means it works at home-chamber pressure. Amber means the evidence so far is only from higher-pressure clinical chambers.</span>
+    </p>
+
+    <div class="mech-grid">
+
+      <!-- 1. ROS Signaling -->
+      <div class="mech-card">
+        <h3>ROS Signaling</h3>
+        <div class="plain-name plain">Your cells' repair trigger</div>
+        <div class="tech">
+          <p>Controlled hyperoxia generates <a class="term" href="glossary.html#ros">reactive oxygen species</a> that act as signaling molecules, upregulating antioxidant enzymes, DNA repair pathways, and protective proteins. This is <a class="term" href="glossary.html#hormesis">hormesis</a>: a calibrated stress that strengthens the system. ROS signaling is the upstream trigger for most of HBOT's downstream effects&mdash;HIF-1&alpha;, stem cells, anti-inflammatory cascades.</p>
+          <p class="finding"><strong>Key finding:</strong> 1.4 ATA produced 0.408 &plusmn; 0.06 &mu;mol/min peak ROS vs. 0.406 &plusmn; 0.06 at 2.5 ATA. Same kinetic profile, same timeline. <span class="cite">Fratantonio et al., Int J Mol Sci, 2023</span></p>
+        </div>
+        <div class="plain">
+          <p>A controlled burst of extra oxygen tells your cells to switch on their repair and defense programs. The same principle behind exercise adaptation: a small stress triggers a stronger baseline. This signal kicks off most of HBOT's other benefits.</p>
+          <p class="finding"><strong>Key finding:</strong> Mild home-level pressure triggered the same cellular repair signal as clinical-grade pressure. <span class="cite">Fratantonio 2023</span></p>
+        </div>
+        <span class="badge badge-home">Home 1.5 ATA</span>
+      </div>
+
+      <!-- 2. HIF-1a Paradox -->
+      <div class="mech-card">
+        <h3><a class="term" href="glossary.html#hif1a">HIF-1&alpha;</a> Paradox</h3>
+        <div class="plain-name plain">Building oxygen infrastructure between sessions</div>
+        <div class="tech">
+          <p>HIF-1&alpha; (Hypoxia-Inducible Factor 1-alpha) is a master regulator that activates genes for <a class="term" href="glossary.html#angiogenesis">angiogenesis</a>, erythropoiesis, and tissue repair. The paradox: HBOT floods you with O<sub>2</sub>, but upon return to normoxia, residual antioxidant scavengers create relative hypoxia, activating HIF-1&alpha;. Repeated hyperoxia&ndash;normoxia cycles compound the effect. Drives <a class="term" href="glossary.html#vegf">VEGF</a>, EPO, SDF-1, and <a class="term" href="glossary.html#sirtuin">sirtuin</a> expression.</p>
+          <p class="finding"><strong>Key finding:</strong> 1.4&ndash;1.5 ATA generates sufficient hyperoxia to trigger the paradox. Intermittent cycling matters more than peak pressure. <span class="cite">Hadanny &amp; Efrati, Biomolecules, 2020; Cimino et al., Int J Mol Sci, 2024</span></p>
+        </div>
+        <div class="plain">
+          <p>After each session, your body notices oxygen dropping back to normal and thinks "we need more oxygen capacity." So it builds new blood vessels, makes more red blood cells, and recruits repair cells. You benefit <em>between</em> sessions, not just during them. Daily sessions compound this effect over weeks and months.</p>
+          <p class="finding"><strong>Key finding:</strong> Home-level pressure triggers this paradox. Consistency (daily sessions) matters more than intensity. <span class="cite">Hadanny &amp; Efrati 2020</span></p>
+        </div>
+        <span class="badge badge-home">Home 1.5 ATA</span>
+      </div>
+
+      <!-- 3. Angiogenesis -->
+      <div class="mech-card">
+        <h3>Angiogenesis</h3>
+        <div class="plain-name plain">Growing new blood vessels</div>
+        <div class="tech">
+          <p>HBOT promotes capillary growth via VEGF (triggered by HIF-1&alpha;), plus PDGF and FGF for vessel stabilization. New capillaries persist&mdash;you're building permanent circulatory infrastructure. Documented in diabetic wound models via HIF-1&alpha;/VEGF/SDF-1 signaling cascade and confirmed in crush injury RCTs with elevated serum VEGF.</p>
+          <p class="finding"><strong>Key finding:</strong> HBOT activates the full molecular chain from HIF-1&alpha; signal to new vessel formation in fibroblasts and endothelial cells. <span class="cite">Dhamodharan et al., Life Sciences, 2020</span></p>
+        </div>
+        <div class="plain">
+          <p>Your body grows new tiny blood vessels, improving circulation to areas that weren't getting enough oxygen. Once built, these vessels stay. This helps with wound healing, exercise recovery, brain function, and any tissue that's been oxygen-starved.</p>
+          <p class="finding"><strong>Key finding:</strong> HBOT activates the growth factors that build new blood vessels. Clinically proven in wound healing. <span class="cite">Dhamodharan 2020</span></p>
+        </div>
+        <span class="badge badge-home">Home 1.5 ATA (via HIF-1&alpha;)</span>
+      </div>
+
+      <!-- 4. Stem Cell Mobilization -->
+      <div class="mech-card">
+        <h3>Stem Cell Mobilization</h3>
+        <div class="plain-name plain">Releasing your body's repair crew</div>
+        <div class="tech">
+          <p>HBOT activates <a class="term" href="glossary.html#enos">eNOS</a> in bone marrow, triggering MMP-9 to cleave anchoring proteins holding <a class="term" href="glossary.html#cd34">CD34+</a> progenitor cells. They release into circulation and home to damaged tissue via SDF-1 signaling. A single session at 2.0 ATA doubles circulating CD34+ cells. Dose-response: 2.5 ATA produces 1.9&ndash;3x more than 2.0 ATA over 10&ndash;20 treatments. Even hyperbaric <em>air</em> at 1.27 ATA produced significant mobilization.</p>
+          <p class="finding"><strong>Key finding:</strong> Stem cell mobilization has no hard floor&mdash;it's a dose-response curve. 1.27 ATA air works. 1.5 ATA + 93% O<sub>2</sub> is well into effective territory. <span class="cite">Thom et al., Am J Physiol, 2006; Haddad et al., Front Neurol, 2023</span></p>
+        </div>
+        <div class="plain">
+          <p>Your bone marrow contains repair cells (stem cells) that can fix damaged tissue throughout your body. HBOT tells your bone marrow to release more of them into your bloodstream. A single session doubles the number of circulating repair cells. Even very mild pressure works&mdash;it's a dial, not a switch.</p>
+          <p class="finding"><strong>Key finding:</strong> Even pressure below what home chambers provide showed measurable stem cell release. <span class="cite">Thom 2006, Haddad 2023</span></p>
+        </div>
+        <span class="badge badge-home">Home 1.5 ATA</span>
+      </div>
+
+      <!-- 5. Telomere Lengthening -->
+      <div class="mech-card">
+        <h3>Telomere Lengthening</h3>
+        <div class="plain-name plain">Reversing a biological aging clock</div>
+        <div class="tech">
+          <p><a class="term" href="glossary.html#telomeres">Telomeres</a> are protective chromosomal end-caps that shorten with each cell division. In a prospective trial (n=35, age 64+), 60 HBOT sessions at 2.0 ATA/100% O<sub>2</sub> lengthened telomeres by 20&ndash;38% depending on cell type. B cells: 37.63% &plusmn; 22.36%. T helpers: 29.39% &plusmn; 23.39%.</p>
+          <p class="finding"><strong>Caveat:</strong> First human demonstration that HBOT can reverse telomere shortening. <strong>2.0 ATA protocol only</strong>&mdash;unproven at 1.5 ATA. Mechanistically plausible at lower pressure (HIF-1&alpha; pathway is active) but no study has tested it. <span class="cite">Efrati et al., Aging, 2020</span></p>
+        </div>
+        <div class="plain">
+          <p>Telomeres are like the plastic tips on shoelaces&mdash;they protect your DNA but get shorter every time your cells divide. A clinical trial with adults over 64 showed HBOT made them 20&ndash;38% longer over 60 sessions. That's equivalent to reversing years of biological aging in those cell populations.</p>
+          <p class="finding"><strong>Caveat:</strong> This result required clinical-grade pressure (2.0 ATA). Home chambers can't replicate this protocol. It <em>might</em> work at lower pressure, but nobody's tested it yet. <span class="cite">Efrati 2020</span></p>
+        </div>
+        <span class="badge badge-clinical">Clinical 2.0 ATA only</span>
+      </div>
+
+      <!-- 6. Senescent Cell Clearance -->
+      <div class="mech-card">
+        <h3>Senescent Cell Clearance</h3>
+        <div class="plain-name plain">Clearing out zombie cells</div>
+        <div class="tech">
+          <p><a class="term" href="glossary.html#senescent">Senescent cells</a> cease division but secrete <a class="term" href="glossary.html#sasp">SASP</a> (inflammatory cytokines, chemokines, proteases), driving "inflammaging." The same Efrati trial measured an 11&ndash;37% reduction in senescent T cell populations. Senescent T helpers decreased 37.30% &plusmn; 33.04%. For context, the senolytic drug combination dasatinib + quercetin produces comparable reductions in mouse models.</p>
+          <p class="finding"><strong>Caveat:</strong> HBOT achieves senolytic-like clearance via immune-mediated mechanisms, not direct killing. <strong>2.0 ATA protocol only</strong>&mdash;untested at lower pressure. <span class="cite">Efrati et al., Aging, 2020</span></p>
+        </div>
+        <div class="plain">
+          <p>As you age, some cells stop working but don't get recycled. They sit there releasing inflammatory molecules that damage everything around them&mdash;"zombie cells." The same clinical trial that showed telomere lengthening also showed HBOT reduced these zombie cells by 11&ndash;37%. The pharmaceutical industry is spending billions trying to achieve this with drugs.</p>
+          <p class="finding"><strong>Caveat:</strong> Same as telomeres&mdash;demonstrated only at 2.0 ATA clinical pressure. Not yet tested at home-chamber levels. <span class="cite">Efrati 2020</span></p>
+        </div>
+        <span class="badge badge-clinical">Clinical 2.0 ATA only</span>
+      </div>
+
+      <!-- 7. Inflammation Reduction -->
+      <div class="mech-card">
+        <h3>Inflammation Reduction</h3>
+        <div class="plain-name plain">Turning down chronic inflammation</div>
+        <div class="tech">
+          <p>Multiple converging mechanisms: <a class="term" href="glossary.html#nfkb">NF-&kappa;B</a> suppression (master inflammation transcription factor), direct reduction of TNF-&alpha;, IL-1&beta;, IL-6, IFN-&gamma;, macrophage polarization from M1 (pro-inflammatory) to M2 (tissue-repairing). RA patients showed significant CRP and ESR reduction after 30 sessions. Fibromyalgia patients improved in pain, fatigue, and anxiety after 20 sessions.</p>
+          <p class="finding"><strong>Key finding:</strong> NF-&kappa;B suppression operates wherever hyperoxia is achieved, including 1.4&ndash;1.5 ATA. Anti-inflammatory effect is dose-dependent but direction is consistent at mild pressure. <span class="cite">Naude, Biomolecules, 2021</span></p>
+        </div>
+        <div class="plain">
+          <p>Chronic low-grade inflammation drives heart disease, cognitive decline, autoimmune conditions, chronic pain, and accelerated aging. HBOT suppresses the master switch for inflammatory genes and directly reduces the molecules that cause pain, swelling, and fatigue. Patients with rheumatoid arthritis and fibromyalgia showed significant improvement.</p>
+          <p class="finding"><strong>Key finding:</strong> The anti-inflammatory mechanism works at home-chamber pressure. Daily mild sessions may match or exceed weekly clinical sessions through accumulated exposure. <span class="cite">Naude 2021</span></p>
+        </div>
+        <span class="badge badge-home">Home 1.5 ATA</span>
+      </div>
+
+      <!-- 8. Cognitive Improvement -->
+      <div class="mech-card">
+        <h3>Cognitive Improvement</h3>
+        <div class="plain-name plain">More oxygen to the brain</div>
+        <div class="tech">
+          <p>Converging mechanisms: direct oxygenation of under-perfused brain tissue, cerebral angiogenesis, neuroinflammation reduction via microglial suppression, <a class="term" href="glossary.html#neuroplasticity">neuroplasticity</a> stimulation, and mitochondrial metabolic recovery. A 2022 systematic review confirmed improvements in memory, executive function, attention, and processing speed.</p>
+          <p class="finding"><strong>Key finding:</strong> 2025 double-blind RCT at exactly 1.5 ATA: 10.6 vs 3.6 improvement over sham (p = 0.01). Level 1 evidence at home-chamber pressure. The dosage analysis found 40 sessions at 1.5 ATA most consistent; PEDro quality scores 8&ndash;9/10. <span class="cite">Hadanny et al., Sci Rep, 2025</span></p>
+        </div>
+        <div class="plain">
+          <p>Your brain uses 20% of your body's oxygen despite being 2% of your weight. When oxygen delivery declines&mdash;from injury, aging, or inflammation&mdash;cognitive function declines with it. HBOT improves brain function by delivering oxygen to starved tissue, growing new blood vessels in the brain, and reducing neuroinflammation.</p>
+          <p class="finding"><strong>Key finding:</strong> A gold-standard clinical trial (double-blind, randomized) at 1.5 ATA&mdash;exactly home-chamber pressure&mdash;showed significant cognitive improvement over placebo. 40 sessions was the sweet spot. <span class="cite">Hadanny 2025</span></p>
+        </div>
+        <span class="badge badge-home">Home 1.5 ATA &mdash; Level 1 evidence</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Dose-Response ── -->
+<section id="dose">
+  <div class="container">
+    <h2>Dose-Response</h2>
+
+    <div class="tech">
+      <h3>Mechanism Activation by Pressure</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Mechanism</th><th>Lowest Effective</th><th>Clinical Standard</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ROS signaling</td><td class="accent">1.4 ATA</td><td>2.5 ATA</td><td>Virtually identical kinetics</td></tr>
+            <tr><td>HIF-1&alpha; paradox</td><td class="accent">1.4&ndash;1.5 ATA</td><td>2.0&ndash;2.5 ATA</td><td>Operates wherever intermittent hyperoxia achieved</td></tr>
+            <tr><td>Stem cell mobilization</td><td class="accent">1.27 ATA</td><td>2.0&ndash;2.5 ATA</td><td>Even air (not O<sub>2</sub>) works; dose-response curve</td></tr>
+            <tr><td>Cognitive improvement</td><td class="accent">1.5 ATA</td><td>1.5 ATA</td><td>Level 1 evidence (double-blind RCT)</td></tr>
+            <tr><td>Angiogenesis (VEGF)</td><td class="accent">1.4&ndash;1.5 ATA</td><td>2.0&ndash;2.5 ATA</td><td>Downstream of HIF-1&alpha;</td></tr>
+            <tr><td>Inflammation (NF-&kappa;B)</td><td class="accent">1.4&ndash;1.5 ATA</td><td>2.0&ndash;2.5 ATA</td><td>Suppression wherever hyperoxia achieved</td></tr>
+            <tr><td>Telomere lengthening</td><td>2.0 ATA</td><td>2.0 ATA</td><td>Unproven below 2.0</td></tr>
+            <tr><td>Senescent cell clearance</td><td>2.0 ATA</td><td>2.0 ATA</td><td>Same Efrati trial; plausible at 1.5 but no data</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Six of eight mechanisms are active at 1.4&ndash;1.5 ATA. The two that aren't have only been studied at 2.0 ATA&mdash;they may work at lower pressure, but nobody's run that trial yet.</p>
+    </div>
+
+    <div class="plain">
+      <h3>What Works at Home Pressure vs. What Needs a Clinic</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Mechanism</th><th>Works at Home?</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Cellular repair signal (ROS)</td><td class="accent">Yes</td><td>Identical to clinical-grade chambers</td></tr>
+            <tr><td>Oxygen infrastructure building (HIF-1&alpha;)</td><td class="accent">Yes</td><td>Daily home use may beat occasional clinic visits</td></tr>
+            <tr><td>Stem cell release</td><td class="accent">Yes</td><td>Even milder pressure than home chambers works</td></tr>
+            <tr><td>Brain function improvement</td><td class="accent">Yes</td><td>Gold-standard trial done at exactly home pressure</td></tr>
+            <tr><td>New blood vessel growth</td><td class="accent">Yes</td><td>Triggered by the same pathway as HIF-1&alpha;</td></tr>
+            <tr><td>Inflammation reduction</td><td class="accent">Yes</td><td>The mechanism works wherever extra oxygen is present</td></tr>
+            <tr><td>Telomere lengthening</td><td>Unproven</td><td>Only tested at clinical pressure so far</td></tr>
+            <tr><td>Zombie cell clearance</td><td>Unproven</td><td>Plausible but no data yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Six of eight mechanisms work at home pressure. The other two might&mdash;they just haven't been tested yet.</p>
+    </div>
+
+    <h3 style="margin-top: 2rem;">Dissolved Oxygen Math</h3>
+    <div class="tech">
+      <p>Oxygen dissolves in plasma proportional to partial pressure (<a class="term" href="glossary.html#henrys-law">Henry's Law</a>). Hemoglobin is already 97&ndash;99% saturated at sea level&mdash;the entire HBOT effect comes from dissolved plasma O<sub>2</sub>.</p>
+    </div>
+    <div class="plain">
+      <p>Your red blood cells are already carrying as much oxygen as they can. HBOT works by dissolving extra oxygen directly into your blood plasma. Here's how much:</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Condition</th><th>Dissolved O<sub>2</sub></th><th>vs. Normal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Normal breathing (sea level)</td><td class="num">0.3 mL/dL</td><td class="num">1x</td></tr>
+          <tr><td>1.3 ATA + room air</td><td class="num">0.6 mL/dL</td><td class="num">~2x</td></tr>
+          <tr><td>1.3 ATA + 93% O<sub>2</sub></td><td class="num">2.7 mL/dL</td><td class="num">~9x</td></tr>
+          <tr class="row-highlight"><td><strong>1.5 ATA + 93% O<sub>2</sub></strong></td><td class="num"><strong>3.1 mL/dL</strong></td><td class="num"><strong>~10x</strong></td></tr>
+          <tr><td>2.0 ATA + 100% O<sub>2</sub></td><td class="num">4.5 mL/dL</td><td class="num">~15x</td></tr>
+          <tr><td>2.5 ATA + 100% O<sub>2</sub></td><td class="num">5.6 mL/dL</td><td class="num">~19x</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p><strong>The key insight:</strong> <span class="tech">The jump from normal (0.3 mL/dL) to 1.5 ATA with a concentrator (3.1 mL/dL) is a <strong>10x increase</strong>. The jump from 1.5 to 2.0 ATA is only another 45%. Most of the dissolved O<sub>2</sub> benefit happens in the first step up.</span><span class="plain">Going from normal breathing to a home chamber gives you <strong>10x more dissolved oxygen</strong>. Going from a home chamber to a clinical one adds only 45% more. You get most of the benefit from the first step.</span></p>
+    </div>
+
+    <div class="tech">
+      <h3 style="margin-top: 1.5rem;">The Concentrator Bottleneck</h3>
+      <p>Above 1.5 ATA, the concentrator&mdash;not the chamber&mdash;becomes the limiting factor. A 10 LPM concentrator delivers 93% O<sub>2</sub>, sufficient to saturate a 1.5 ATA environment. Push higher and the same concentrator dilutes its output into a larger pressure volume. Full benefit above 1.5 ATA requires 100% O<sub>2</sub> from cylinders: regulated medical gas, specialized fittings, fire risk management. That's the line between home-practical and clinic-territory.</p>
+    </div>
+    <div class="plain">
+      <h3 style="margin-top: 1.5rem;">Why 1.5 ATA Is the Home Sweet Spot</h3>
+      <p>The oxygen machine (concentrator) can feed enough oxygen to fully saturate a 1.5 ATA chamber. Push the pressure higher and the machine can't keep up&mdash;you're adding pressure but not proportionally adding oxygen. Getting full benefit above 1.5 ATA requires medical-grade oxygen tanks, which is a fundamentally different (and more expensive, more complex) setup.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── What to Expect ── -->
+<section id="expect">
+  <div class="container">
+    <h2>What to Expect</h2>
+
+    <h3>Timeline</h3>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">1&ndash;10</div>
+        <div class="timeline-content">
+          <strong>Learning curve</strong>
+          <span class="tech">Ear equalization technique develops. Body begins inflammatory upregulation as immune response activates. Fatigue and brain fog common. ROS and HIF-1&alpha; signaling initiating but no perceptible benefit yet.</span>
+          <span class="plain">You're learning to equalize your ears and getting used to the chamber. Most people feel more tired than usual. That's normal&mdash;your body is ramping up its repair response, and that takes energy.</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">10&ndash;35</div>
+        <div class="timeline-content">
+          <strong>The hard part</strong>
+          <span class="tech">The "healing crisis" phase. Inflammatory symptoms may increase as immune surveillance upregulates and senescent/damaged cells are targeted. Fatigue, brain fog, and localized inflammation common. Signaling cascades are active but adaptation hasn't caught up. This is where most people quit.</span>
+          <span class="plain">This is where it often feels worse before it gets better. More fatigue, maybe brain fog, sometimes old injuries flaring up. Your body is doing repair work and the cleanup creates temporary inflammation. This is where people quit&mdash;right before it starts working.</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">35&ndash;40</div>
+        <div class="timeline-content">
+          <strong>Inflection point</strong>
+          <span class="tech">Adaptive responses begin to outpace inflammatory processes. Angiogenic remodeling, accumulated stem cell deployment, and NF-&kappa;B suppression reach functional thresholds. Commonly cited as the point where subjective benefit becomes apparent.</span>
+          <span class="plain">The corner. New blood vessels have been growing, repair cells have been working, inflammation is coming down. People start noticing they feel better&mdash;clearer thinking, more energy, less pain.</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">40+</div>
+        <div class="timeline-content">
+          <strong>Maintenance</strong>
+          <span class="tech">Continued protocol at 5x/week sustains HIF-1&alpha; cycling, maintains elevated stem cell flux, and compounds angiogenic gains. Benefits plateau at different timescales depending on target (cognitive may plateau sooner; vascular remodeling continues longer). The Efrati telomere protocol ran 60 sessions.</span>
+          <span class="plain">You've built momentum. Ongoing sessions maintain and extend the benefits. Many longevity-focused users continue indefinitely. The telomere study ran 60 sessions. Some people use it for years.</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 2rem;">Frequency</h3>
+    <div class="callout callout-green">
+      <p><strong>5x/week</strong>&mdash;the standard in clinical protocols and community experience. <span class="tech">HIF-1&alpha; activation depends on repeated hyperoxia-normoxia cycling; daily exposure maintains the signaling cascade without gaps long enough for reset.</span><span class="plain">Daily sessions keep the repair signal going. Too many gaps and the cycle resets.</span></p>
+      <p><strong>3x/week</strong>&mdash;minimum effective. Slower progress, but still on the curve.</p>
+      <p><strong>1&ndash;2x/week</strong>&mdash;consensus is this doesn't build enough momentum for longevity goals. The signaling never accumulates.</p>
+    </div>
+
+    <h3 style="margin-top: 2rem;">What a Session Looks Like</h3>
+    <p>60&ndash;90 minutes. Pressurize over 5&ndash;15 minutes (equalize your ears like on a plane). Breathe through an oxygen mask while you read, watch something, or nap. Take 3 air breaks (mask off for 5 minutes every 20&ndash;30 minutes<span class="tech">&mdash;this creates the intermittent hyperoxia-normoxia cycling that amplifies HIF-1&alpha; signaling</span><span class="plain">&mdash;this on/off pattern amplifies the repair signal</span>). Depressurize over 5&ndash;10 minutes. Drink water.</p>
+  </div>
+</section>
+
+<!-- ── Compared to Other Interventions ── -->
+<section id="compare">
+  <div class="container">
+    <h2>Compared to Other Interventions</h2>
+    <p class="section-intro">Where HBOT fits among longevity interventions.</p>
+
+    <div class="table-wrap">
+      <table class="cmp-table">
+        <thead>
+          <tr><th>Intervention</th><th>Evidence</th><th>Annual Cost</th><th>Risk</th><th>Key Limitation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Exercise</td>
+            <td><span class="tech">Gold standard. 30&ndash;35% all-cause mortality reduction. Massive RCT base.</span><span class="plain">Best thing you can do. Decades of proof. Reduces death risk by a third.</span></td>
+            <td class="num">$0&ndash;2K</td>
+            <td>Near zero</td>
+            <td>None. The baseline everything else builds on.</td>
+          </tr>
+          <tr>
+            <td>HBOT (1.5 ATA)</td>
+            <td><span class="tech">Strong mechanistic + Level 1 RCT evidence at this pressure for cognition. Human data for stem cells, ROS, inflammation.</span><span class="plain">Strong science with real clinical trials at home pressure. Multiple proven mechanisms.</span></td>
+            <td class="num">~$1.5K</td>
+            <td>Very low</td>
+            <td>Time-intensive (60&ndash;90 min/day). First month can feel worse.</td>
+          </tr>
+          <tr>
+            <td>Red light therapy</td>
+            <td><span class="tech">Moderate. RCTs for skin, wounds, pain. Longevity-specific data thin. Mechanism: cytochrome c oxidase activation.</span><span class="plain">Moderate. Proven for skin and pain. Longevity evidence thin. Different mechanism than HBOT.</span></td>
+            <td class="num">$200&ndash;1.5K</td>
+            <td>Essentially zero</td>
+            <td>Longevity-specific evidence weak.</td>
+          </tr>
+          <tr>
+            <td>Cold exposure</td>
+            <td><span class="tech">Moderate for metabolic/mood. 43% insulin sensitivity improvement in T2D (10-day protocol). No lifespan RCTs.</span><span class="plain">Good for metabolism and mood. No longevity-specific trials yet.</span></td>
+            <td class="num">$0&ndash;5K</td>
+            <td>Low&ndash;moderate</td>
+            <td>Longevity case is thin. Cardiovascular risk for some.</td>
+          </tr>
+          <tr>
+            <td>NAD+/NMN</td>
+            <td><span class="tech">Promising preclinical. Human RCTs showing improved walking speed and sleep. No lifespan data.</span><span class="plain">Promising early science. Improves energy markers but no proof it extends life.</span></td>
+            <td class="num">$1.2&ndash;3.6K</td>
+            <td>Low</td>
+            <td>Ongoing cost. Long-term unknowns.</td>
+          </tr>
+          <tr>
+            <td>Rapamycin</td>
+            <td><span class="tech">Strongest preclinical longevity drug (extends lifespan in every animal model). Human PEARL trial: safe but no clear healthspan gains.</span><span class="plain">Extends life in every animal tested. Human evidence still catching up. Real side effects.</span></td>
+            <td class="num">$1&ndash;3K</td>
+            <td>Moderate</td>
+            <td>Immunosuppression, lipid changes, mouth sores. Requires monitoring.</td>
+          </tr>
+          <tr>
+            <td>Peptides</td>
+            <td><span class="tech">Strong rodent data. Three published human studies for BPC-157 total. Zero longevity studies.</span><span class="plain">Impressive animal results. Almost no human evidence. Legal gray area.</span></td>
+            <td class="num">$1.2&ndash;4K</td>
+            <td>Unknown</td>
+            <td>Barely any human data. Quality control variable. FDA cracking down.</td>
+          </tr>
+          <tr>
+            <td>Metformin</td>
+            <td><span class="tech">Decades of safety data in diabetics. Non-diabetic longevity evidence weak. May blunt exercise adaptations.</span><span class="plain">Very safe (used for decades in diabetes). Unproven for longevity in healthy people. May reduce exercise benefits.</span></td>
+            <td class="num">$50&ndash;200</td>
+            <td>Low</td>
+            <td>May blunt exercise benefits. TAME trial still running.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top: 1.5rem;">
+      <p><span class="tech"><strong>Bottom line:</strong> Exercise is the foundation&mdash;30&ndash;35% all-cause mortality reduction, free, near-zero risk. After that, HBOT has the strongest mechanistic evidence of any non-exercise intervention with human RCTs at the relevant pressure. Build the stack on exercise + HBOT, layer selectively from there.</span><span class="plain"><strong>Bottom line:</strong> Exercise first, always. Nothing on this list comes close. After that, HBOT has the strongest scientific evidence of any non-exercise intervention, backed by randomized clinical trials at the relevant pressure. The rest have thinner evidence, higher risk, or both.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── References ── -->
+<section id="refs">
+  <div class="container">
+    <h2>References</h2>
+
+    <div class="ref-section">
+      <h4>ROS Signaling</h4>
+      <p>Fratantonio, D. et al. "Oxidative Stress Response Kinetics after 60 Minutes at Different (1.4 ATA and 2.5 ATA) Hyperbaric Hyperoxia Exposures." <em>Int J Mol Sci</em>, 2023. PMC10418619.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>HIF-1&alpha; Activation</h4>
+      <p>Hadanny, A. &amp; Efrati, S. "The Hyperoxic-Hypoxic Paradox." <em>Biomolecules</em>, 2020. PMC7355982.</p>
+      <p>Cimino, F. et al. "Hyperoxia: Effective Mechanism of Hyperbaric Treatment at Mild-Pressure." <em>Int J Mol Sci</em>, 2024. PMC10815786.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Angiogenesis</h4>
+      <p>Dhamodharan, U. et al. "Hyperbaric oxygen potentiates diabetic wound healing..." <em>Life Sciences</em>, 2020. PubMed 32791151.</p>
+      <p>StatPearls. "Hyperbaric Oxygen Effects on Angiogenesis." NLM, reviewed 2024. NBK482485.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Stem Cell Mobilization</h4>
+      <p>Thom, S.R. et al. "Stem cell mobilization by hyperbaric oxygen." <em>Am J Physiol</em>, 2006. PubMed 16299259.</p>
+      <p>Thom, S.R. et al. "CD34+/CD45-dim stem cell mobilization by hyperbaric oxygen..." <em>Stem Cell Research</em>, 2014. PMC4037447.</p>
+      <p>Haddad, H.W. et al. "Hyperbaric air mobilizes stem cells in humans..." <em>Front Neurol</em>, 2023. PMC10318163.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Telomere Lengthening &amp; Senescent Cell Clearance</h4>
+      <p>Efrati, S. et al. "Hyperbaric oxygen therapy increases telomere length and decreases immunosenescence..." <em>Aging</em>, 2020. PMC7746357.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Inflammation Reduction</h4>
+      <p>Naude, L. "The Effects of Hyperbaric Oxygenation on Oxidative Stress, Inflammation and Angiogenesis." <em>Biomolecules</em>, 2021. PMC8394403.</p>
+      <p>Resatoglu et al. "HBOT in Rheumatoid Arthritis." <em>J Clin Rheumatol</em>, 2021.</p>
+      <p>Sun, Y. et al. "Effect of HBOT on HMGB1/NF-kB expression..." <em>Neuroscience Letters</em>, 2018.</p>
+      <p>Oyaizu, T. et al. "Hyperbaric oxygen reduces inflammation, oxygenates injured muscle..." <em>Scientific Reports</em>, 2018.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Cognitive Improvement</h4>
+      <p>Hadanny, A. et al. "A double-blind randomized trial of hyperbaric oxygen for persistent symptoms after brain injury." <em>Sci Rep</em>, 2025.</p>
+      <p>Hadanny, A. et al. "Impact of HBOT on Cognitive Functions: a Systematic Review." <em>Neuropsychol Rev</em>, 2022. PMC8888529.</p>
+      <p>"Systematic Review and Dosage Analysis: HBOT Efficacy in Mild TBI..." <em>Front Neurol</em>, 2022.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Longevity Comparisons</h4>
+      <p>Moore, S.C. et al. "Leisure time physical activity and mortality." <em>PMC</em>, 2012.</p>
+      <p>Hamblin, M.R. "Mechanisms of anti-inflammatory effects of photobiomodulation." <em>AIMS Biophysics</em>, 2017.</p>
+      <p>Hanssen, M.J.W. et al. "Cold acclimation improves insulin sensitivity in T2DM." <em>Nature Medicine</em>, 2015.</p>
+      <p>Yamaguchi, S. et al. "Safety and efficacy of long-term NMN supplementation..." <em>NPJ Aging</em>, 2024.</p>
+      <p>Blagosklonny, M.V. "Rapamycin for longevity." <em>Aging</em>, 2019.</p>
+      <p>PEARL Trial. Rapamycin safety and healthspan outcomes. 2025.</p>
+      <p>Barzilai, N. et al. "Metformin as a tool to target aging." <em>Cell Metabolism</em>, 2016.</p>
+      <p>Konopka, A.R. et al. "Metformin inhibits mitochondrial adaptations to aerobic exercise..." <em>Aging Cell</em>, 2019.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <p><strong>Not medical advice.</strong> Consult your physician before starting HBOT or any new therapy.</p>
+    <p>Compiled from clinical literature, February 2026. <a href="safety.html">Safety</a> &middot; <a href="costs.html">Costs</a> &middot; <a href="glossary.html">Glossary</a></p>
+    <p style="margin-top: 0.5rem;"><a href="games/tapper.html">HBOT Tapper</a> &middot; <a href="games/pressure.html">Pressure Drop</a> &middot; <a href="games/runner.html">O₂ Runner</a> &middot; <a href="games/hyperbolic.html">Hyperbolic Oxygen</a></p>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var s = localStorage.getItem('hbot-mode');
+  if (s === 'mode-plain' || s === 'mode-technical') document.body.className = s;
+
+  var nt = document.getElementById('nav-track');
+  var nlt = document.getElementById('nav-label-tech');
+  var nlp = document.getElementById('nav-label-plain');
+
+  function tech() { return document.body.classList.contains('mode-technical'); }
+
+  function set(t) {
+    var m = t ? 'mode-technical' : 'mode-plain';
+    document.body.className = m;
+    localStorage.setItem('hbot-mode', m);
+    nt.className = t ? 'toggle-track technical' : 'toggle-track plain';
+    nlt.className = t ? 'toggle-label active' : 'toggle-label inactive';
+    nlp.className = t ? 'toggle-label inactive' : 'toggle-label active';
+    var h = document.getElementById('hero-track');
+    if (h) {
+      h.className = t ? 'toggle-track technical' : 'toggle-track plain';
+      document.getElementById('hero-label-tech').className = t ? 'toggle-label active' : 'toggle-label inactive';
+      document.getElementById('hero-label-plain').className = t ? 'toggle-label inactive' : 'toggle-label active';
+    }
+  }
+
+  set(tech());
+  nt.onclick = function() { set(!tech()); };
+  nlt.onclick = function() { set(true); };
+  nlp.onclick = function() { set(false); };
+
+  var h = document.getElementById('hero-track');
+  if (h) {
+    h.onclick = function() { set(!tech()); };
+    document.getElementById('hero-label-tech').onclick = function() { set(true); };
+    document.getElementById('hero-label-plain').onclick = function() { set(false); };
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var el = document.querySelector(this.getAttribute('href'));
+      if (el) {
+        e.preventDefault();
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - document.querySelector('.sticky-nav').offsetHeight - 16, behavior: 'smooth' });
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

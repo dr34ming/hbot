@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pressure Drop - HBOT Science</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f1117;
+  --bg-card: #181b24;
+  --text: #d4d7e0;
+  --text-muted: #8a8f9e;
+  --text-bright: #eef0f6;
+  --accent: #4a9eab;
+  --accent-dim: #3a7e8b;
+  --green: #3daa6d;
+  --yellow: #c4913a;
+  --red: #c44a4a;
+  --gold: #e8c84a;
+  --border: #282c3a;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game-wrap {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+}
+
+canvas {
+  display: block;
+  cursor: pointer;
+}
+
+/* HUD */
+.hud {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 1rem 1.5rem;
+  pointer-events: none;
+  z-index: 10;
+}
+.hud-left, .hud-right { pointer-events: auto; }
+.hud a {
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.82rem; font-weight: 500;
+  transition: color 0.15s;
+}
+.hud a:hover { color: var(--accent); }
+
+.score-display {
+  font-family: var(--font-mono);
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+}
+.session-display {
+  font-size: 0.75rem; color: var(--text-muted);
+  text-align: right; margin-top: 0.15rem;
+  font-weight: 500;
+}
+.difficulty-display {
+  font-size: 0.65rem; color: var(--yellow);
+  text-align: right; margin-top: 0.2rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+/* Mechanism toast */
+.mech-toast {
+  position: absolute;
+  bottom: 15%;
+  left: 50%; transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.mech-toast.visible { opacity: 1; }
+.mech-toast .mech-name {
+  font-size: 1.1rem; font-weight: 600;
+  color: var(--green);
+  font-family: var(--font-mono);
+  text-shadow: 0 0 20px rgba(61, 170, 109, 0.4);
+  white-space: nowrap;
+}
+.mech-toast .mech-fact {
+  font-size: 0.78rem; color: var(--text-muted);
+  margin-top: 0.3rem;
+  max-width: 320px;
+}
+
+/* Game over overlay */
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(15, 17, 23, 0.92);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 50;
+  padding: 2rem;
+  overflow-y: auto;
+}
+.overlay.visible { display: flex; }
+
+.overlay h1 {
+  font-size: 2rem; color: var(--text-bright);
+  font-weight: 700; margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+.overlay .final-score {
+  font-family: var(--font-mono);
+  font-size: 3rem; font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+.overlay .summary {
+  text-align: center; max-width: 400px;
+  margin-bottom: 2rem;
+}
+.overlay .summary p {
+  font-size: 0.88rem; color: var(--text-muted);
+  line-height: 1.6; margin-bottom: 0.5rem;
+}
+.overlay .summary .activated {
+  font-size: 0.82rem; color: var(--text);
+  line-height: 1.7; text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+}
+.overlay .summary .activated span {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.btn {
+  background: var(--accent);
+  color: var(--bg); font-weight: 600;
+  border: none; border-radius: 8px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem; cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.15s, transform 0.1s;
+}
+.btn:hover { background: var(--accent-dim); }
+.btn:active { transform: scale(0.97); }
+
+/* Start screen */
+.start-screen {
+  text-align: center;
+}
+.start-screen h1 {
+  font-size: 2.2rem; margin-bottom: 0.3rem;
+}
+.start-screen .tagline {
+  color: var(--text-muted); font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+.start-screen .instructions {
+  color: var(--text-muted); font-size: 0.82rem;
+  line-height: 1.6; max-width: 340px;
+  margin: 0 auto 2rem;
+}
+.start-screen .instructions strong { color: var(--text); }
+
+@media (max-width: 500px) {
+  .hud { padding: 0.75rem 1rem; }
+  .score-display { font-size: 1.1rem; }
+  .overlay h1 { font-size: 1.6rem; }
+  .overlay .final-score { font-size: 2.2rem; }
+}
+</style>
+</head>
+<body>
+<div id="game-wrap">
+  <div class="hud">
+    <div class="hud-left">
+      <a href="../index.html">&larr; Back to HBOT Science</a>
+    </div>
+    <div class="hud-right" id="hud-scores" style="display:none;">
+      <div class="score-display" id="score">0</div>
+      <div class="session-display">Session <span id="session">1</span></div>
+      <div class="difficulty-display" id="difficulty"></div>
+    </div>
+  </div>
+
+  <canvas id="gauge"></canvas>
+
+  <div class="mech-toast" id="mech-toast">
+    <div class="mech-name" id="mech-name"></div>
+    <div class="mech-fact" id="mech-fact"></div>
+  </div>
+
+  <!-- Start screen -->
+  <div class="overlay visible" id="start-screen">
+    <div class="start-screen">
+      <h1>Pressure Drop</h1>
+      <p class="tagline">Lock in the perfect chamber pressure</p>
+      <div class="instructions">
+        Hit the <strong>green zone</strong> (1.4 - 1.5 ATA) to activate HBOT mechanisms.
+        Nail <strong>exactly 1.5</strong> for a perfect bonus.<br><br>
+        Click or tap anywhere to lock the needle.
+      </div>
+      <button class="btn" id="start-btn">Start</button>
+    </div>
+  </div>
+
+  <!-- Game over screen -->
+  <div class="overlay" id="game-over">
+    <h1>Treatment Complete</h1>
+    <div class="final-score" id="final-score">0</div>
+    <div class="summary" id="summary"></div>
+    <button class="btn" id="restart-btn">Try Again</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // --- Constants ---
+  var ATA_MIN = 1.0, ATA_MAX = 2.0;
+  var GREEN_LO = 1.4, GREEN_HI = 1.5;
+  var YELLOW_LO = 1.2, YELLOW_HI = 1.7;
+  var PERFECT = 1.5;
+  var PERFECT_TOLERANCE = 0.012;
+  var MAX_MISSES = 3;
+  var TAU = Math.PI * 2;
+  var START_ANGLE = -Math.PI * 0.75;
+  var END_ANGLE = Math.PI * 0.75;
+  var ARC_SPAN = END_ANGLE - START_ANGLE;
+
+  // --- Mechanism data ---
+  var MECHANISMS = [
+    { threshold: 1.27, name: 'Stem Cells Mobilized', fact: 'Even 1.27 ATA air produces measurable stem cell release from bone marrow.' },
+    { threshold: 1.4, name: 'ROS Signaling: ON', fact: '1.4 ATA produces the same ROS kinetics as 2.5 ATA clinical chambers.' },
+    { threshold: 1.4, name: 'NF-kB Suppression Active', fact: 'Hyperoxia suppresses the master inflammatory transcription factor.' },
+    { threshold: 1.4, name: 'HIF-1a Paradox Triggered', fact: 'Intermittent hyperoxia-normoxia cycles drive new blood vessel growth.' },
+    { threshold: 1.4, name: 'Angiogenesis Initiated', fact: 'VEGF expression upregulated. New capillaries building.' },
+    { threshold: 1.5, name: 'Cognitive Boost: Level 1 Evidence', fact: '2025 double-blind RCT: significant improvement at exactly 1.5 ATA.', star: true },
+    { threshold: 1.5, name: 'Dissolved O2: 10x Normal', fact: 'Plasma oxygen jumps from 0.3 to 3.1 mL/dL at 1.5 ATA + 93% O2.' },
+  ];
+
+  // --- DOM ---
+  var canvas = document.getElementById('gauge');
+  var ctx = canvas.getContext('2d');
+  var scoreEl = document.getElementById('score');
+  var sessionEl = document.getElementById('session');
+  var hudScores = document.getElementById('hud-scores');
+  var mechToast = document.getElementById('mech-toast');
+  var mechNameEl = document.getElementById('mech-name');
+  var mechFactEl = document.getElementById('mech-fact');
+  var startScreen = document.getElementById('start-screen');
+  var gameOverScreen = document.getElementById('game-over');
+  var finalScoreEl = document.getElementById('final-score');
+  var summaryEl = document.getElementById('summary');
+
+  // --- State ---
+  var state = 'start'; // start, playing, locked, gameover
+  var score = 0;
+  var session = 0;
+  var misses = 0;
+  var needle1Angle = 0; // radians within arc
+  var needle1Dir = 1;
+  var needle1Speed = 1.2; // radians/sec
+  var needle2Angle = null;
+  var needle2Dir = -1;
+  var needle2Speed = 0;
+  var hasSecondNeedle = false;
+  var greenShrink = 0;
+  var wobbleAmount = 0;
+  var wobbleTime = 0;
+  var lockResult = null;
+  var lockTimer = 0;
+  var toastTimer = 0;
+  var particles = [];
+  var typewriterText = '';
+  var typewriterIdx = 0;
+  var typewriterTimer = 0;
+  var glowPulse = 0;
+  var gaugeSize, cx, cy, outerR, innerR;
+  var activatedMechs = {};
+  var totalMechsActivated = 0;
+  var dpr = window.devicePixelRatio || 1;
+  var lastTime = 0;
+  var shakeX = 0, shakeY = 0;
+
+  // --- Sizing ---
+  function resize() {
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    gaugeSize = Math.min(w, h) * 0.72;
+    if (gaugeSize > 500) gaugeSize = 500;
+    cx = w / 2;
+    cy = h * 0.46;
+    outerR = gaugeSize / 2;
+    innerR = outerR * 0.78;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // --- Helpers ---
+  function ataToAngle(ata) {
+    var t = (ata - ATA_MIN) / (ATA_MAX - ATA_MIN);
+    return START_ANGLE + t * ARC_SPAN;
+  }
+
+  function angleToAta(angle) {
+    var t = (angle - START_ANGLE) / ARC_SPAN;
+    return ATA_MIN + t * (ATA_MAX - ATA_MIN);
+  }
+
+  // --- Particle system ---
+  function spawnParticles(x, y, color, count, spread) {
+    for (var i = 0; i < count; i++) {
+      var angle = Math.random() * TAU;
+      var speed = 40 + Math.random() * spread;
+      particles.push({
+        x: x, y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        decay: 0.6 + Math.random() * 0.8,
+        size: 2 + Math.random() * 4,
+        color: color
+      });
+    }
+  }
+
+  function updateParticles(dt) {
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 60 * dt; // gravity
+      p.life -= p.decay * dt;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+  }
+
+  function drawParticles() {
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      ctx.globalAlpha = p.life * 0.8;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // --- Typewriter ---
+  function startTypewriter(text) {
+    typewriterText = text;
+    typewriterIdx = 0;
+    typewriterTimer = 0;
+  }
+
+  function updateTypewriter(dt) {
+    if (typewriterIdx < typewriterText.length) {
+      typewriterTimer += dt;
+      var charsPerSec = 40;
+      while (typewriterTimer > 1 / charsPerSec && typewriterIdx < typewriterText.length) {
+        typewriterTimer -= 1 / charsPerSec;
+        typewriterIdx++;
+      }
+    }
+  }
+
+  // --- Drawing ---
+  function drawGauge() {
+    var w = canvas.width / dpr;
+    var h = canvas.height / dpr;
+    ctx.clearRect(0, 0, w, h);
+
+    // Subtle radial background glow
+    var bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerR * 1.6);
+    bgGrad.addColorStop(0, 'rgba(74, 158, 171, 0.03)');
+    bgGrad.addColorStop(0.6, 'rgba(74, 158, 171, 0.01)');
+    bgGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Apply wobble
+    ctx.save();
+    ctx.translate(cx + shakeX, cy + shakeY);
+
+    // Outer ring glow
+    ctx.save();
+    ctx.shadowColor = 'rgba(74, 158, 171, 0.15)';
+    ctx.shadowBlur = 30;
+    ctx.beginPath();
+    ctx.arc(0, 0, outerR + 4, START_ANGLE, END_ANGLE);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(74, 158, 171, 0.2)';
+    ctx.stroke();
+    ctx.restore();
+
+    // Background arc
+    ctx.beginPath();
+    ctx.arc(0, 0, outerR, START_ANGLE, END_ANGLE);
+    ctx.lineWidth = outerR - innerR;
+    ctx.lineCap = 'butt';
+    ctx.strokeStyle = '#1a1d28';
+    ctx.stroke();
+
+    // Dynamic green zone boundaries
+    var glo = GREEN_LO + greenShrink * 0.05;
+    var ghi = GREEN_HI - greenShrink * 0.03;
+    if (glo > ghi - 0.02) glo = ghi - 0.02;
+    var ylo = YELLOW_LO;
+    var yhi = YELLOW_HI;
+
+    // Red zones
+    drawArcZone(ATA_MIN, ylo, '#2e1515', 'rgba(196, 74, 74, 0.12)');
+    drawArcZone(yhi, ATA_MAX, '#2e1515', 'rgba(196, 74, 74, 0.12)');
+
+    // Yellow zones
+    drawArcZone(ylo, glo, '#3a3018', 'rgba(196, 155, 58, 0.15)');
+    drawArcZone(ghi, yhi, '#3a3018', 'rgba(196, 155, 58, 0.15)');
+
+    // Green zone with pulse
+    var pulse = 0.1 + Math.sin(glowPulse * 2.5) * 0.06;
+    drawArcZone(glo, ghi, 'rgba(61, 170, 109, 0.25)', 'rgba(61, 170, 109,' + pulse + ')');
+
+    // Perfect sliver (gold)
+    var perfectW = PERFECT_TOLERANCE * 2;
+    var pa1 = ataToAngle(PERFECT - perfectW / 2);
+    var pa2 = ataToAngle(PERFECT + perfectW / 2);
+    ctx.beginPath();
+    ctx.arc(0, 0, (outerR + innerR) / 2, pa1, pa2);
+    ctx.lineWidth = outerR - innerR - 4;
+    ctx.strokeStyle = 'rgba(232, 200, 74, 0.6)';
+    ctx.stroke();
+
+    // Tick marks and labels
+    drawTicks();
+
+    // ATA label in center
+    drawCenterLabel();
+
+    // Draw needles
+    drawNeedle(needle1Angle, '#e8584a', 'rgba(232, 88, 74, 0.4)');
+    if (hasSecondNeedle && needle2Angle !== null) {
+      drawNeedle(needle2Angle, '#5a8edb', 'rgba(90, 142, 219, 0.4)');
+    }
+
+    // Center cap
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 0, TAU);
+    ctx.fillStyle = '#2a2d38';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, 6, 0, TAU);
+    ctx.fillStyle = var_accent;
+    ctx.fill();
+
+    ctx.restore();
+
+    // Particles (in screen space)
+    drawParticles();
+
+    // Lock result text
+    if (lockResult) {
+      drawLockResult();
+    }
+
+    // Misses indicator
+    drawMisses();
+  }
+
+  var var_accent = '#4a9eab';
+
+  function drawArcZone(ataLo, ataHi, fill, glow) {
+    var a1 = ataToAngle(ataLo);
+    var a2 = ataToAngle(ataHi);
+    ctx.beginPath();
+    ctx.arc(0, 0, (outerR + innerR) / 2, a1, a2);
+    ctx.lineWidth = outerR - innerR;
+    ctx.lineCap = 'butt';
+    ctx.strokeStyle = fill;
+    ctx.stroke();
+    if (glow) {
+      ctx.save();
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.arc(0, 0, (outerR + innerR) / 2, a1, a2);
+      ctx.lineWidth = outerR - innerR;
+      ctx.strokeStyle = glow;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawTicks() {
+    var tickAtas = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0];
+    // Labels at these values
+    var labelAtas = { '1.0': 1, '1.2': 1, '1.4': 1, '1.5': 1, '1.7': 1, '2.0': 1 };
+    for (var i = 0; i < tickAtas.length; i++) {
+      var ata = tickAtas[i];
+      var angle = ataToAngle(ata);
+      var hasLabel = labelAtas[ata.toFixed(1)];
+      var major = hasLabel;
+      var tickLen = major ? 14 : 8;
+      var r1 = outerR + 4;
+      var r2 = r1 + tickLen;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(angle) * r1, Math.sin(angle) * r1);
+      ctx.lineTo(Math.cos(angle) * r2, Math.sin(angle) * r2);
+      ctx.lineWidth = major ? 2 : 1;
+      ctx.strokeStyle = major ? '#5a5e6e' : '#3a3e4e';
+      ctx.stroke();
+
+      if (hasLabel) {
+        var lr = r2 + 16;
+        ctx.fillStyle = ata === 1.5 ? '#e8c84a' : '#8a8f9e';
+        ctx.font = (ata === 1.5 ? '700 ' : '600 ') + (gaugeSize * 0.038) + 'px ' + var_font;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ata.toFixed(1), Math.cos(angle) * lr, Math.sin(angle) * lr);
+      }
+    }
+    // Minor ticks at 0.05 intervals
+    for (var j = 0; j <= 20; j++) {
+      var ata2 = 1.0 + j * 0.05;
+      if (Math.round(ata2 * 10) % 1 === 0 && Math.round(ata2 * 100) % 10 !== 0) {
+        var a2 = ataToAngle(ata2);
+        var mr1 = outerR + 4;
+        var mr2 = mr1 + 4;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a2) * mr1, Math.sin(a2) * mr1);
+        ctx.lineTo(Math.cos(a2) * mr2, Math.sin(a2) * mr2);
+        ctx.lineWidth = 0.5;
+        ctx.strokeStyle = '#2a2e3e';
+        ctx.stroke();
+      }
+    }
+  }
+
+  var var_font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  var var_mono = "'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace";
+
+  function drawCenterLabel() {
+    var ata1 = angleToAta(needle1Angle + START_ANGLE);
+    ctx.font = '700 ' + (gaugeSize * 0.1) + 'px ' + var_mono;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = var_accent;
+    ctx.fillText(ata1.toFixed(2), 0, -5);
+    ctx.font = '500 ' + (gaugeSize * 0.04) + 'px ' + var_font;
+    ctx.fillStyle = '#6a6e7e';
+    ctx.fillText('ATA', 0, gaugeSize * 0.06);
+  }
+
+  function drawNeedle(angleOffset, color, glowColor) {
+    var angle = START_ANGLE + angleOffset;
+    var needleLen = innerR + (outerR - innerR) * 0.6;
+    var tailLen = 20;
+    var nx = Math.cos(angle);
+    var ny = Math.sin(angle);
+
+    // Glow trail
+    ctx.save();
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.moveTo(-nx * tailLen, -ny * tailLen);
+    ctx.lineTo(nx * needleLen, ny * needleLen);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = color;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    // Needle body
+    ctx.beginPath();
+    ctx.moveTo(-nx * tailLen, -ny * tailLen);
+    ctx.lineTo(nx * needleLen, ny * needleLen);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = color;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Tip
+    ctx.beginPath();
+    ctx.arc(nx * needleLen, ny * needleLen, 4, 0, TAU);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function drawLockResult() {
+    if (!lockResult) return;
+    var alpha = Math.min(1, lockTimer * 3);
+    if (lockTimer > 1.5) alpha = Math.max(0, 1 - (lockTimer - 1.5) * 2);
+
+    var w = canvas.width / dpr;
+    var yPos = cy - outerR - 50;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    if (lockResult.type === 'perfect') {
+      ctx.font = '800 ' + (gaugeSize * 0.12) + 'px ' + var_font;
+      ctx.fillStyle = '#e8c84a';
+      ctx.shadowColor = 'rgba(232, 200, 74, 0.6)';
+      ctx.shadowBlur = 30;
+      ctx.fillText('PERFECT!', cx, yPos);
+    } else if (lockResult.type === 'green') {
+      ctx.font = '700 ' + (gaugeSize * 0.09) + 'px ' + var_font;
+      ctx.fillStyle = '#3daa6d';
+      ctx.shadowColor = 'rgba(61, 170, 109, 0.4)';
+      ctx.shadowBlur = 20;
+      ctx.fillText('Good!', cx, yPos);
+    } else if (lockResult.type === 'yellow') {
+      ctx.font = '600 ' + (gaugeSize * 0.07) + 'px ' + var_font;
+      ctx.fillStyle = '#c4913a';
+      ctx.fillText('Partial', cx, yPos);
+    } else {
+      ctx.font = '600 ' + (gaugeSize * 0.07) + 'px ' + var_font;
+      ctx.fillStyle = '#c44a4a';
+      ctx.fillText('Miss!', cx, yPos);
+    }
+
+    // Points
+    if (lockResult.points !== 0) {
+      ctx.font = '700 ' + (gaugeSize * 0.055) + 'px ' + var_mono;
+      ctx.fillStyle = lockResult.points > 0 ? '#4a9eab' : '#c44a4a';
+      ctx.shadowColor = 'transparent';
+      ctx.fillText((lockResult.points > 0 ? '+' : '') + lockResult.points, cx, yPos + gaugeSize * 0.1);
+    }
+
+    ctx.restore();
+  }
+
+  function drawMisses() {
+    var y = cy + outerR + 45;
+    var heartSize = gaugeSize * 0.055;
+    var spacing = heartSize * 1.8;
+    var startX = cx - (MAX_MISSES - 1) * spacing / 2;
+
+    for (var i = 0; i < MAX_MISSES; i++) {
+      var hx = startX + i * spacing;
+      var alive = i < (MAX_MISSES - misses);
+      ctx.font = heartSize + 'px ' + var_font;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      if (alive) {
+        ctx.fillStyle = misses >= 2 ? '#c44a4a' : '#c44a6a';
+        ctx.fillText('\u2665', hx, y);
+      } else {
+        ctx.fillStyle = '#2a2d38';
+        ctx.fillText('\u2665', hx, y);
+      }
+    }
+  }
+
+  // --- Game Logic ---
+  function startGame() {
+    state = 'playing';
+    score = 0;
+    session = 0;
+    misses = 0;
+    needle1Angle = 0;
+    needle1Dir = 1;
+    needle1Speed = 1.2;
+    needle2Angle = null;
+    hasSecondNeedle = false;
+    greenShrink = 0;
+    wobbleAmount = 0;
+    lockResult = null;
+    particles = [];
+    activatedMechs = {};
+    totalMechsActivated = 0;
+    nextRound();
+    hudScores.style.display = 'block';
+    startScreen.classList.remove('visible');
+    gameOverScreen.classList.remove('visible');
+    updateHUD();
+  }
+
+  function nextRound() {
+    session++;
+    lockResult = null;
+    lockTimer = 0;
+    toastTimer = 0;
+    mechToast.classList.remove('visible');
+
+    // Randomize starting position each round
+    needle1Angle = Math.random() * ARC_SPAN;
+
+    // Speed ramps
+    needle1Speed = 1.2 + (session - 1) * 0.12;
+    if (needle1Speed > 5) needle1Speed = 5;
+
+    // Round 5+: random direction reversal
+    if (session >= 5 && Math.random() < 0.4) {
+      needle1Dir *= -1;
+    }
+
+    // Round 10+: second needle
+    if (session >= 10) {
+      hasSecondNeedle = true;
+      needle2Angle = ARC_SPAN * 0.7;
+      needle2Dir = -needle1Dir;
+      needle2Speed = needle1Speed * 0.8;
+    } else {
+      hasSecondNeedle = false;
+      needle2Angle = null;
+    }
+
+    // Round 15+: green zone shrinks
+    if (session >= 15) {
+      greenShrink = Math.min((session - 14) * 0.3, 1.5);
+    }
+
+    // Round 20+: wobble
+    if (session >= 20) {
+      wobbleAmount = Math.min((session - 19) * 0.5, 3);
+    }
+
+    state = 'playing';
+    updateHUD();
+  }
+
+  function lockNeedle() {
+    if (state !== 'playing') return;
+    state = 'locked';
+    lockTimer = 0;
+    toastTimer = 0;
+
+    var ata1 = angleToAta(needle1Angle + START_ANGLE);
+    var glo = GREEN_LO + greenShrink * 0.05;
+    var ghi = GREEN_HI - greenShrink * 0.03;
+    if (glo > ghi - 0.02) glo = ghi - 0.02;
+
+    var result, points;
+    var isPerfect = Math.abs(ata1 - PERFECT) < PERFECT_TOLERANCE;
+    var isGreen = ata1 >= glo && ata1 <= ghi;
+    var isYellow = (ata1 >= YELLOW_LO && ata1 < glo) || (ata1 > ghi && ata1 <= YELLOW_HI);
+
+    // Second needle check
+    var n2ok = true;
+    if (hasSecondNeedle && needle2Angle !== null) {
+      var ata2 = angleToAta(needle2Angle + START_ANGLE);
+      var n2green = ata2 >= glo && ata2 <= ghi;
+      var n2yellow = (ata2 >= YELLOW_LO && ata2 < glo) || (ata2 > ghi && ata2 <= YELLOW_HI);
+      if (!n2green && !n2yellow) n2ok = false;
+      if (!n2green) isGreen = false; // both must be green for green
+    }
+
+    if (isPerfect && n2ok) {
+      result = 'perfect';
+      points = 150 + session * 10;
+      spawnParticles(cx, cy - outerR - 30, '#e8c84a', 50, 180);
+      spawnParticles(cx, cy - outerR - 30, '#fff', 20, 120);
+      flashAlpha = 0.15;
+      flashColor = '#e8c84a';
+    } else if (isGreen && n2ok) {
+      result = 'green';
+      points = 100 + session * 5;
+      spawnParticles(cx, cy - outerR - 30, '#3daa6d', 20, 100);
+      flashAlpha = 0.08;
+      flashColor = '#3daa6d';
+    } else if (isYellow || (isGreen && !n2ok)) {
+      result = 'yellow';
+      points = 30;
+    } else {
+      result = 'red';
+      points = -25;
+      misses++;
+    }
+
+    score += points;
+    if (score < 0) score = 0;
+    lockResult = { type: result, points: points, ata: ata1 };
+
+    // Activate mechanisms
+    if (result !== 'red') {
+      var activated = [];
+      for (var i = 0; i < MECHANISMS.length; i++) {
+        if (ata1 >= MECHANISMS[i].threshold) {
+          if (!activatedMechs[MECHANISMS[i].name]) {
+            activatedMechs[MECHANISMS[i].name] = true;
+          }
+          activated.push(MECHANISMS[i]);
+          totalMechsActivated++;
+        }
+      }
+      // Show a random activated mechanism
+      if (activated.length > 0) {
+        var mech = activated[Math.floor(Math.random() * activated.length)];
+        showMechToast(mech);
+      }
+    }
+
+    updateHUD();
+  }
+
+  function showMechToast(mech) {
+    mechNameEl.textContent = '';
+    mechFactEl.textContent = '';
+    startTypewriter(mech.name);
+    mechFactEl.textContent = mech.fact;
+    if (mech.star) {
+      mechNameEl.style.color = '#e8c84a';
+    } else {
+      mechNameEl.style.color = '#3daa6d';
+    }
+    mechToast.classList.add('visible');
+  }
+
+  var difficultyEl = document.getElementById('difficulty');
+
+  function updateHUD() {
+    scoreEl.textContent = score;
+    sessionEl.textContent = session;
+    var mods = [];
+    if (session >= 5) mods.push('reversals');
+    if (session >= 10) mods.push('dual needle');
+    if (session >= 15) mods.push('narrow zone');
+    if (session >= 20) mods.push('wobble');
+    difficultyEl.textContent = mods.length > 0 ? mods.join(' + ') : '';
+  }
+
+  function showGameOver() {
+    state = 'gameover';
+    finalScoreEl.textContent = score;
+
+    var mechNames = Object.keys(activatedMechs);
+    var html = '<p>You activated <strong style="color:#4a9eab;">' + mechNames.length + ' mechanisms</strong> across <strong style="color:#4a9eab;">' + (session) + ' sessions</strong>.</p>';
+
+    if (mechNames.length > 0) {
+      html += '<div class="activated">';
+      for (var i = 0; i < mechNames.length; i++) {
+        html += '<span>' + mechNames[i] + '</span><br>';
+      }
+      html += '</div>';
+    }
+
+    html += '<p style="margin-top:1rem; font-size:0.78rem;">Each pressure threshold activates real HBOT mechanisms. At 1.5 ATA with 93% O2, plasma oxygen increases 10x, driving stem cell release, ROS signaling, inflammation suppression, angiogenesis, and cognitive improvement backed by Level 1 evidence.</p>';
+
+    summaryEl.innerHTML = html;
+    gameOverScreen.classList.add('visible');
+    mechToast.classList.remove('visible');
+  }
+
+  // --- Game Loop ---
+  function tick(ts) {
+    if (!lastTime) lastTime = ts;
+    var rawDt = (ts - lastTime) / 1000;
+    lastTime = ts;
+    // Cap dt for physics (needle movement) but allow locked/gameover states to advance freely
+    var dt = state === 'playing' ? Math.min(rawDt, 0.05) : Math.min(rawDt, 1.0);
+
+    glowPulse += dt;
+    updateParticles(dt);
+    updateTypewriter(dt);
+
+    // Update typewriter display
+    if (typewriterIdx > 0) {
+      mechNameEl.textContent = typewriterText.substring(0, typewriterIdx);
+    }
+
+    if (state === 'playing') {
+      // Move needles
+      needle1Angle += needle1Dir * needle1Speed * dt;
+
+      // Bounce off ends
+      if (needle1Angle <= 0) { needle1Angle = 0; needle1Dir = 1; }
+      if (needle1Angle >= ARC_SPAN) { needle1Angle = ARC_SPAN; needle1Dir = -1; }
+
+      if (hasSecondNeedle && needle2Angle !== null) {
+        needle2Angle += needle2Dir * needle2Speed * dt;
+        if (needle2Angle <= 0) { needle2Angle = 0; needle2Dir = 1; }
+        if (needle2Angle >= ARC_SPAN) { needle2Angle = ARC_SPAN; needle2Dir = -1; }
+      }
+
+      // Wobble
+      if (wobbleAmount > 0) {
+        wobbleTime += dt * 5;
+        shakeX = Math.sin(wobbleTime * 3.7) * wobbleAmount;
+        shakeY = Math.cos(wobbleTime * 2.3) * wobbleAmount;
+      } else {
+        shakeX = 0; shakeY = 0;
+      }
+    }
+
+    if (state === 'locked') {
+      lockTimer += dt;
+      toastTimer += dt;
+
+      // Wobble calms down
+      if (wobbleAmount > 0) {
+        wobbleTime += dt * 2;
+        var wobbleFade = Math.max(0, 1 - lockTimer * 2);
+        shakeX = Math.sin(wobbleTime * 3.7) * wobbleAmount * wobbleFade;
+        shakeY = Math.cos(wobbleTime * 2.3) * wobbleAmount * wobbleFade;
+      }
+
+      // Fade toast after a bit
+      if (toastTimer > 2.2) {
+        mechToast.classList.remove('visible');
+      }
+
+      // Next round or game over
+      if (lockTimer > 2.5) {
+        if (misses >= MAX_MISSES) {
+          showGameOver();
+        } else {
+          nextRound();
+        }
+      }
+    }
+
+    drawGauge();
+
+    // Screen flash effect
+    if (flashAlpha > 0) {
+      ctx.globalAlpha = flashAlpha;
+      ctx.fillStyle = flashColor;
+      ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      ctx.globalAlpha = 1;
+      flashAlpha -= dt * 3;
+      if (flashAlpha < 0) flashAlpha = 0;
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  var flashAlpha = 0;
+  var flashColor = '#3daa6d';
+
+  // --- Input ---
+  function handleInput(e) {
+    e.preventDefault();
+    if (state === 'playing') {
+      lockNeedle();
+    }
+  }
+
+  canvas.addEventListener('click', handleInput);
+  canvas.addEventListener('touchstart', handleInput, { passive: false });
+
+  document.getElementById('start-btn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    startGame();
+  });
+
+  document.getElementById('restart-btn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    startGame();
+  });
+
+  // Prevent touch on buttons from triggering canvas
+  document.querySelectorAll('.btn').forEach(function(b) {
+    b.addEventListener('touchstart', function(e) { e.stopPropagation(); });
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      if (state === 'start') startGame();
+      else if (state === 'playing') lockNeedle();
+      else if (state === 'gameover') startGame();
+    }
+  });
+
+  // --- Boot ---
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

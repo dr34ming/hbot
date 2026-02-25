@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyperbolic Oxygen — A Wellness Industry Simulator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f1117;
+  --bg-card: #181b24;
+  --bg-card-hover: #1e2230;
+  --text: #d4d7e0;
+  --text-muted: #8a8f9e;
+  --text-bright: #eef0f6;
+  --accent: #4a9eab;
+  --accent-dim: #3a7e8b;
+  --green: #3daa6d;
+  --green-bg: rgba(61, 170, 109, 0.12);
+  --amber: #c4913a;
+  --amber-bg: rgba(196, 145, 58, 0.12);
+  --border: #282c3a;
+  --border-light: #333848;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+  /* grift colors */
+  --grift-pink: #e84393;
+  --grift-gold: #fdcb6e;
+  --grift-purple: #a29bfe;
+  --grift-orange: #e17055;
+  --grift-neon: #00cec9;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Layout ── */
+#game-container {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ── Top Bar ── */
+#top-bar {
+  grid-column: 1 / -1;
+  background: rgba(15, 17, 23, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+#top-bar .back-link {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+#top-bar .title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: -0.02em;
+}
+
+#money-display {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--grift-gold);
+  text-shadow: 0 0 20px rgba(253, 203, 110, 0.3);
+}
+
+#income-display {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Main Area ── */
+#main-area {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+/* ── Chamber ── */
+#chamber-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  user-select: none;
+}
+
+#chamber {
+  width: 220px;
+  height: 280px;
+  background: linear-gradient(145deg, #1a2040, #151a30);
+  border: 3px solid var(--accent-dim);
+  border-radius: 110px 110px 40px 40px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.08s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#chamber:hover {
+  border-color: var(--accent);
+}
+
+#chamber:active {
+  transform: scale(0.96);
+}
+
+#chamber .window {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #6ecfcf 0%, #2a7a8a 50%, #1a4a5a 100%);
+  border: 3px solid var(--accent-dim);
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+#chamber .window::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  top: 12px;
+  left: 18px;
+  transform: rotate(-30deg);
+}
+
+#chamber .gauge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #111;
+  border: 2px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+#chamber .label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+#chamber .bubbles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(74, 158, 171, 0.4);
+  border-radius: 50%;
+  animation: bubbleUp 1.5s ease-out forwards;
+}
+
+@keyframes bubbleUp {
+  0% { opacity: 0.8; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-200px) scale(0.3); }
+}
+
+#click-power {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+#click-power strong { color: var(--accent); }
+
+/* ── Float text on click ── */
+.float-text {
+  position: fixed;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--grift-gold);
+  text-shadow: 0 0 8px rgba(253, 203, 110, 0.5);
+  animation: floatUp 1s ease-out forwards;
+  z-index: 200;
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-80px); }
+}
+
+/* ── Stats Panel ── */
+#stats-panel {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 440px;
+}
+
+.stat-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  text-align: center;
+}
+
+.stat-box .stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-box .stat-value {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+/* ── Prestige ── */
+#prestige-panel {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(135deg, rgba(162, 155, 254, 0.08), rgba(232, 67, 147, 0.08));
+  border: 1px solid rgba(162, 155, 254, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  text-align: center;
+  display: none;
+}
+
+#prestige-panel.visible { display: block; }
+
+#prestige-panel h3 {
+  font-size: 0.9rem;
+  color: var(--grift-purple);
+  margin-bottom: 0.4rem;
+}
+
+#prestige-panel p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+#prestige-btn {
+  background: linear-gradient(135deg, var(--grift-purple), var(--grift-pink));
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+#prestige-btn:hover { opacity: 0.85; }
+#prestige-btn:active { transform: scale(0.96); }
+
+#viral-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--grift-purple);
+  margin-top: 0.4rem;
+}
+
+/* ── Upgrades Panel ── */
+#upgrades-panel {
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+#upgrades-panel h2 {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.2rem;
+}
+
+.tier-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 0 0.2rem;
+  color: var(--text-muted);
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 0.2rem;
+}
+
+.tier-label.t1 { color: var(--green); }
+.tier-label.t2 { color: var(--amber); }
+.tier-label.t3 { color: var(--grift-orange); }
+.tier-label.t4 { color: var(--grift-pink); }
+
+.upgrade-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.7rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, opacity 0.2s;
+  text-align: left;
+  width: 100%;
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.upgrade-btn:hover:not(:disabled) {
+  border-color: var(--border-light);
+  background: var(--bg-card-hover);
+}
+
+.upgrade-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.upgrade-btn .up-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.upgrade-btn .up-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.upgrade-btn .up-cost {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--grift-gold);
+}
+
+.upgrade-btn .up-owned {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.upgrade-btn.maxed {
+  border-color: var(--green);
+  opacity: 0.6;
+}
+
+.upgrade-btn.maxed .up-cost { color: var(--green); }
+
+/* ── Events Overlay ── */
+#event-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+#event-overlay.active { display: flex; }
+
+#event-box {
+  background: var(--bg-card);
+  border: 2px solid var(--grift-orange);
+  border-radius: var(--radius-lg);
+  max-width: 460px;
+  width: 100%;
+  padding: 1.5rem;
+  position: relative;
+}
+
+#event-box .event-emoji {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+#event-box h3 {
+  font-size: 1.05rem;
+  color: var(--text-bright);
+  margin-bottom: 0.4rem;
+}
+
+#event-box p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+#event-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-choice-btn {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.event-choice-btn:hover {
+  border-color: var(--accent);
+  background: var(--bg-card-hover);
+}
+
+.event-choice-btn .choice-label {
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.event-choice-btn .choice-effect {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* ── FDA Mini-game ── */
+#fda-game {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(180, 10, 10, 0.15);
+  z-index: 600;
+  padding: 1rem;
+}
+
+#fda-game.active { display: block; }
+
+#fda-timer {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #c0392b;
+  color: white;
+  padding: 0.4rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  z-index: 601;
+  box-shadow: 0 4px 20px rgba(192, 57, 43, 0.5);
+}
+
+.fda-claim {
+  position: absolute;
+  background: var(--bg-card);
+  border: 2px solid #c0392b;
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-bright);
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+  max-width: 280px;
+  z-index: 601;
+  user-select: none;
+}
+
+.fda-claim:hover { transform: scale(1.03); }
+
+.fda-claim.removed {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+/* ── Science Cards ── */
+#science-card {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0d2830;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.5rem;
+  max-width: 520px;
+  width: calc(100% - 2rem);
+  z-index: 300;
+  box-shadow: 0 8px 40px rgba(74, 158, 171, 0.2);
+}
+
+#science-card.visible { display: block; }
+
+#science-card .sci-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+
+#science-card .sci-text {
+  font-size: 0.88rem;
+  color: var(--text-bright);
+  line-height: 1.55;
+}
+
+#science-card .sci-cite {
+  font-size: 0.72rem;
+  color: var(--accent-dim);
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+#science-card .sci-timer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  transition: width linear;
+}
+
+/* ── Toast Messages ── */
+.toast {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  color: var(--text-bright);
+  z-index: 400;
+  animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.5s forwards;
+  white-space: nowrap;
+}
+
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  #game-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+  }
+
+  #upgrades-panel {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    max-height: 50vh;
+    order: 3;
+  }
+
+  #main-area { order: 2; }
+  #top-bar { flex-wrap: wrap; }
+
+  #chamber {
+    width: 180px;
+    height: 230px;
+  }
+
+  #chamber .window {
+    width: 64px;
+    height: 64px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="game-container">
+
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <a href="../index.html" class="back-link">&larr; Back to HBOT Science</a>
+    <span class="title">Hyperbolic Oxygen</span>
+    <div style="text-align: right;">
+      <div id="money-display">$0</div>
+      <div id="income-display">$0/sec</div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div id="main-area">
+
+    <div id="chamber-wrap">
+      <div id="chamber" title="Click to treat a customer">
+        <div class="bubbles" id="bubbles"></div>
+        <div class="window"></div>
+        <div class="gauge">1.5</div>
+        <div class="label">HBOT Chamber</div>
+      </div>
+      <div id="click-power">
+        <strong>$<span id="per-click">1</span></strong> per treatment
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div id="stats-panel">
+      <div class="stat-box">
+        <div class="stat-label">Customers Treated</div>
+        <div class="stat-value" id="stat-customers">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value" id="stat-revenue">$0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Wellness Crimes</div>
+        <div class="stat-value" id="stat-crimes">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Real Facts Learned</div>
+        <div class="stat-value" id="stat-facts">0</div>
+      </div>
+    </div>
+
+    <!-- Prestige -->
+    <div id="prestige-panel">
+      <h3>GO VIRAL</h3>
+      <p>Reset your operation, but your clout carries over. Future earnings multiplied by <strong id="prestige-mult">2x</strong>.</p>
+      <button id="prestige-btn">Go Viral (requires $1M)</button>
+      <div id="viral-count">Times gone viral: <span id="viral-num">0</span></div>
+    </div>
+
+  </div>
+
+  <!-- Upgrades Panel -->
+  <div id="upgrades-panel">
+    <h2>Upgrades</h2>
+    <div id="upgrades-list"></div>
+  </div>
+
+</div>
+
+<!-- Event Overlay -->
+<div id="event-overlay">
+  <div id="event-box">
+    <div class="event-emoji" id="event-emoji"></div>
+    <h3 id="event-title"></h3>
+    <p id="event-desc"></p>
+    <div id="event-choices"></div>
+  </div>
+</div>
+
+<!-- FDA Mini-game -->
+<div id="fda-game">
+  <div id="fda-timer">FDA INSPECTOR: <span id="fda-countdown">5</span>s</div>
+</div>
+
+<!-- Science Card -->
+<div id="science-card">
+  <div class="sci-label">Real Science</div>
+  <div class="sci-text" id="sci-text"></div>
+  <div class="sci-cite" id="sci-cite"></div>
+  <div class="sci-timer" id="sci-timer"></div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Number formatting ──
+  const SUFFIXES = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc'];
+  function fmt(n) {
+    if (n < 1000) return Math.floor(n).toLocaleString();
+    let i = 0;
+    let v = n;
+    while (v >= 1000 && i < SUFFIXES.length - 1) { v /= 1000; i++; }
+    return (i > 0 && v >= 100 ? Math.floor(v) : v.toFixed(1).replace(/\.0$/, '')) + SUFFIXES[i];
+  }
+  function fmtMoney(n) { return '$' + fmt(n); }
+
+  // ── Game State ──
+  let state = {
+    money: 0,
+    totalRevenue: 0,
+    customers: 0,
+    clickValue: 1,
+    autoIncome: 0,
+    crimes: 0,
+    factsLearned: 0,
+    viralCount: 0,
+    viralMult: 1,
+    upgrades: {},
+    factsSeen: [],
+    lastSave: Date.now()
+  };
+
+  // ── Upgrades Definition ──
+  const UPGRADES = [
+    // Tier 1 - Legitimate
+    { id: 'concentrator', tier: 1, name: 'Better Concentrator', desc: 'Bumps O\u2082 from 87% to 93%. Customers can tell somehow.',
+      effect: 'click', value: 2, baseCost: 25, costMult: 1.4, max: 10, crime: false },
+    { id: 'second_chamber', tier: 1, name: 'Second Chamber', desc: 'Auto-treats patients while you click. You legally cannot sleep in it.',
+      effect: 'auto', value: 1, baseCost: 100, costMult: 1.5, max: 10, crime: false },
+    { id: 'ear_guide', tier: 1, name: 'Ear Equalization Guide', desc: 'Laminated card. Reduces complaints by 40%. Cost: $0.12 to print.',
+      effect: 'click', value: 3, baseCost: 200, costMult: 1.6, max: 5, crime: false },
+    { id: 'comfy_mattress', tier: 1, name: 'Memory Foam Mattress', desc: 'Patients fall asleep and stop asking questions. Win-win.',
+      effect: 'auto', value: 3, baseCost: 500, costMult: 1.5, max: 5, crime: false },
+
+    // Tier 2 - Questionable
+    { id: 'essential_oils', tier: 2, name: 'Essential Oil Diffuser', desc: 'Lavender-scented placebo pumped into the chamber. Customers pay double because "holistic."',
+      effect: 'click', value: 8, baseCost: 1500, costMult: 1.6, max: 5, crime: true },
+    { id: 'salt_lamp', tier: 2, name: 'Himalayan Salt Lamp', desc: 'Emits nothing but vibes and a warm glow. +$5/sec from atmosphere alone.',
+      effect: 'auto', value: 5, baseCost: 2000, costMult: 1.5, max: 5, crime: true },
+    { id: 'influencer', tier: 2, name: 'Influencer Partnership', desc: 'Pays @breathe_wellness_babe to post "literally changed my cellular DNA" with a chamber selfie.',
+      effect: 'auto', value: 12, baseCost: 5000, costMult: 1.7, max: 5, crime: true },
+    { id: 'quantum_sticker', tier: 2, name: 'Quantum Resonance Sticker', desc: 'A $0.03 holographic sticker placed on the chamber. You charge $50/session extra for "quantum-enhanced oxygen." It\'s just a sticker.',
+      effect: 'click', value: 20, baseCost: 8000, costMult: 1.6, max: 5, crime: true },
+
+    // Tier 3 - Full Grift
+    { id: 'detox', tier: 3, name: 'Detox Package', desc: 'An $80 green smoothie with activated charcoal. The charcoal does nothing. The kale does nothing. The profit margin does everything.',
+      effect: 'click', value: 40, baseCost: 25000, costMult: 1.7, max: 5, crime: true },
+    { id: 'aura_photo', tier: 3, name: 'Aura Photography Station', desc: 'Thermal camera with a rainbow color map. Customers get a "before/after." The camera literally measures skin temperature. They cry happy tears.',
+      effect: 'auto', value: 30, baseCost: 40000, costMult: 1.7, max: 5, crime: true },
+    { id: 'celebrity', tier: 3, name: 'Celebrity Endorsement', desc: 'A contestant from Season 14 of The Bachelor tweets "HBOT fixed my gut-brain axis." 43 followers see it. Bookings triple.',
+      effect: 'auto', value: 50, baseCost: 75000, costMult: 1.8, max: 3, crime: true },
+    { id: 'franchise', tier: 3, name: 'Franchise Model', desc: 'License your "methodology" to other cities. It\'s the same chamber with different essential oils. You call it proprietary.',
+      effect: 'auto', value: 100, baseCost: 200000, costMult: 2.0, max: 5, crime: true },
+
+    // Tier 4 - Peak Absurdity
+    { id: 'trinity', tier: 4, name: 'HBOT + CBD + Sound Bath', desc: 'The unholy trinity. A singing bowl vibrates the chamber while CBD oil drips from the ceiling. Customers achieve "cellular enlightenment." Their wallets achieve emptiness.',
+      effect: 'click', value: 100, baseCost: 500000, costMult: 1.8, max: 5, crime: true },
+    { id: 'oxygen_bar', tier: 4, name: 'Oxygen Bar Side Hustle', desc: 'Flavored oxygen at atmospheric pressure. It\'s literally just sniffing scented air at sea level. $18 per 10 minutes. The irony is not lost on you.',
+      effect: 'auto', value: 200, baseCost: 800000, costMult: 1.9, max: 5, crime: true },
+    { id: 'nft', tier: 4, name: 'NFT Membership Passes', desc: 'Each session comes with a unique blockchain token. It "proves your cells were oxygenated." The gas fees cost more than the session.',
+      effect: 'auto', value: 400, baseCost: 1500000, costMult: 2.0, max: 3, crime: true },
+    { id: 'tulum', tier: 4, name: 'Wellness Retreat in Tulum', desc: '$15K/week. An HBOT session, 6 hours of "breathwork" (breathing), jungle yoga, and a shaman who\'s from Connecticut. Fully booked through 2027.',
+      effect: 'auto', value: 1000, baseCost: 5000000, costMult: 2.2, max: 3, crime: true }
+  ];
+
+  // ── Science Facts ──
+  const SCIENCE_FACTS = [
+    { text: 'ROS signaling at 1.4 ATA actually matches 2.5 ATA clinical pressure. Same kinetic profile, same timeline. The mild chamber triggers the same cellular repair signal as the expensive one.', cite: 'Fratantonio et al., Int J Mol Sci, 2023' },
+    { text: '2025 double-blind RCT showed significant cognitive improvement at exactly 1.5 ATA over sham. Level 1 evidence \u2014 the gold standard \u2014 at home-chamber pressure.', cite: 'Hadanny et al., Sci Rep, 2025' },
+    { text: 'Stem cell mobilization works even at 1.27 ATA with just air \u2014 no supplemental oxygen needed. It\'s a dose-response curve, not a threshold.', cite: 'Haddad et al., Front Neurol, 2023' },
+    { text: 'A single HBOT session at 2.0 ATA doubles circulating CD34+ stem cells. Your bone marrow literally releases its repair crew into your bloodstream.', cite: 'Thom et al., Am J Physiol, 2006' },
+    { text: '60 HBOT sessions lengthened telomeres by 20\u201338% in adults over 64. That\'s equivalent to reversing years of biological aging in those cell populations.', cite: 'Efrati et al., Aging, 2020' },
+    { text: 'NF-\u03BAB suppression \u2014 the master switch for inflammatory genes \u2014 operates wherever hyperoxia is achieved, including at 1.4\u20131.5 ATA.', cite: 'Naude, Biomolecules, 2021' },
+    { text: 'The jump from normal breathing to 1.5 ATA with a concentrator is a 10x increase in dissolved plasma oxygen. Going from 1.5 to 2.0 ATA adds only 45% more.', cite: 'Henry\'s Law / standard physiology' },
+    { text: 'HBOT reduced senescent ("zombie") T cells by 11\u201337%. The pharmaceutical industry is spending billions trying to achieve this with drugs.', cite: 'Efrati et al., Aging, 2020' },
+    { text: 'The hyperoxic-hypoxic paradox: flooding with O\u2082 during sessions triggers a rebound effect between sessions, where HIF-1\u03B1 builds new blood vessels and recruits repair cells.', cite: 'Hadanny & Efrati, Biomolecules, 2020' },
+    { text: 'Fibromyalgia patients showed significant improvement in pain, fatigue, and anxiety after just 20 HBOT sessions. Anti-inflammatory mechanisms are dose-dependent but consistent even at mild pressure.', cite: 'Naude, Biomolecules, 2021' },
+    { text: 'You know the real science is impressive enough without all this, right?', cite: '\u2014 Your conscience' },
+    { text: 'Hemoglobin is already 97\u201399% saturated at sea level. You literally cannot load more oxygen onto red blood cells. The entire HBOT effect comes from dissolved plasma oxygen \u2014 a completely different delivery route.', cite: 'Standard physiology' },
+    { text: '40 sessions at 1.5 ATA was the most consistent protocol for cognitive improvement. PEDro quality scores 8\u20139/10 \u2014 that\'s rigorous science.', cite: 'Front Neurol, 2022 (Systematic Review)' },
+    { text: 'Angiogenesis (new blood vessel growth) triggered by HBOT is permanent. You\'re building circulatory infrastructure, not just temporarily increasing flow.', cite: 'Dhamodharan et al., Life Sciences, 2020' }
+  ];
+
+  // ── Events ──
+  const EVENTS = [
+    {
+      emoji: '\u2b50', title: 'Yelp Review: \u2605\u2606\u2606\u2606\u2606',
+      desc: '"Sat in a tube for an hour. My third eye did NOT open. Also the lavender smell gave me a headache. Would not recommend for spiritual awakening."',
+      choices: [
+        { label: 'Respond diplomatically', effect: '"We appreciate your feedback and focus on evidence-based wellness."', fn: () => { state.money += state.clickValue * 20; toast('+' + fmtMoney(state.clickValue * 20) + ' (reputation saved)'); } },
+        { label: 'Respond sarcastically', effect: '"Ma\'am, we oxygenate cells, not chakras. That said, your review oxygenated our comment section beautifully."', fn: () => { state.money += state.clickValue * 50; state.crimes++; toast('+' + fmtMoney(state.clickValue * 50) + ' (went viral) +1 crime'); } }
+      ]
+    },
+    {
+      emoji: '\ud83c\udfea', title: 'Competitor Alert',
+      desc: 'A "Himalayan Salt Cave + Cryotherapy Fusion Studio" opened next door. They have better Instagram lighting than you.',
+      choices: [
+        { label: 'Compete on science', effect: 'Print actual studies. Attract smarter customers. Slow but steady.', fn: () => { state.clickValue += 5; toast('+$5 per click (the nerds found you)'); } },
+        { label: 'Compete on vibes', effect: 'Install a crystal grid and rename everything. "Quantum Oxygen Experience."', fn: () => { state.autoIncome += 10; state.crimes += 2; toast('+$10/sec, +2 crimes (you became them)'); } },
+        { label: 'Merge with them', effect: 'If you can\'t beat \'em, absorb \'em. Salt cave oxygen bar. Peak wellness.', fn: () => { state.autoIncome += 25; state.crimes += 3; toast('+$25/sec, +3 crimes (wellness voltron)'); } }
+      ]
+    },
+    {
+      emoji: '\ud83d\udc15', title: 'Customer Testimonial Request',
+      desc: 'A regular customer claims HBOT cured their golden retriever\'s separation anxiety. The dog has never been in the chamber. They want to write a testimonial.',
+      choices: [
+        { label: 'Politely decline', effect: 'You explain that anecdotes aren\'t evidence. They look hurt.', fn: () => { toast('Integrity preserved. No money gained. Weird.'); } },
+        { label: 'Feature it prominently', effect: '"Bailey the Golden Retriever: HBOT Changed Her Life." Complete with paw print signature.', fn: () => { state.money += state.clickValue * 100; state.crimes += 2; toast('+' + fmtMoney(state.clickValue * 100) + ', +2 crimes (Bailey sends her regards)'); } }
+      ]
+    },
+    {
+      emoji: '\ud83d\udcfa', title: 'Local News Segment',
+      desc: 'Channel 7 wants to do a "Wellness or Nonsense?" segment featuring your clinic. This could go really well or really badly.',
+      choices: [
+        { label: 'Show them the real science', effect: 'Risk: boring TV. Reward: legitimate credibility.', fn: () => { state.clickValue += 15; state.autoIncome += 5; toast('+$15/click, +$5/sec (you looked credible on TV)'); } },
+        { label: 'Full wellness theater', effect: 'Essential oils running, salt lamps blazing, a customer "testifying" live.', fn: () => { state.autoIncome += 40; state.crimes += 5; toast('+$40/sec, +5 crimes (it was great television)'); } },
+        { label: 'Decline the interview', effect: 'Play it safe. Nothing happens.', fn: () => { toast('Bullet dodged. Or opportunity missed. Hard to say.'); } }
+      ]
+    },
+    {
+      emoji: '\ud83d\udc68\u200d\u2695\ufe0f', title: 'A Real Doctor Visits',
+      desc: 'An actual physician walks in and asks detailed questions about your protocols. They seem genuinely interested.',
+      choices: [
+        { label: 'Show them the studies', effect: 'Fratantonio 2023, Hadanny 2025, the works. They\'re impressed.', fn: () => { state.clickValue += 20; toast('+$20/click (medical referral network unlocked)'); } },
+        { label: 'Pivot to the aura camera', effect: 'Show them the aura photography setup. They leave immediately.', fn: () => { state.crimes++; toast('+1 crime (you showed a doctor a thermal camera and called it an aura reader)'); } }
+      ]
+    },
+    {
+      emoji: '\ud83d\udcb0', title: 'Crypto Bro Proposition',
+      desc: '"Bro, what if we tokenize oxygen sessions? Each breath becomes a micro-transaction on the blockchain. I already have a whitepaper."',
+      choices: [
+        { label: 'Hard pass', effect: 'You maintain dignity but miss out on the Web3 wellness boom.', fn: () => { toast('Self-respect maintained. Rare in this industry.'); } },
+        { label: 'Take the meeting', effect: 'Three hours of your life you\'ll never get back, but somehow money appears.', fn: () => { state.money += state.clickValue * 200; state.crimes += 3; toast('+' + fmtMoney(state.clickValue * 200) + ', +3 crimes (you have a whitepaper now)'); } }
+      ]
+    },
+    {
+      emoji: '\ud83e\uddd8', title: 'Yoga Instructor Collab',
+      desc: 'A yoga instructor wants to run "Hyperbaric Yoga" sessions in your chamber. The chamber is 28 inches wide. She doesn\'t see the problem.',
+      choices: [
+        { label: 'Explain physics to her', effect: '"You literally cannot do downward dog in a cylinder." She argues.', fn: () => { toast('You explained spatial constraints. She suggested "micro-yoga."'); } },
+        { label: 'Rebrand it', effect: '"Pressurized Breathwork + Intention Setting." She doesn\'t do yoga in the chamber. Nobody notices.',
+          fn: () => { state.autoIncome += 15; state.crimes++; toast('+$15/sec, +1 crime (it\'s just breathing... with pressure)'); } }
+      ]
+    },
+    {
+      emoji: '\ud83d\ude31', title: 'Insurance Company Calls',
+      desc: 'An insurance adjuster wants to know why you\'re billing "quantum cellular regeneration therapy." You don\'t remember writing that on the form.',
+      choices: [
+        { label: 'Blame the intern', effect: 'Classic. There is no intern but they don\'t know that.', fn: () => { toast('Crisis averted. Intern remains fictional.'); } },
+        { label: 'Double down', effect: '"It\'s a proprietary protocol. I can send you the research." You send them the Fratantonio paper.',
+          fn: () => { state.money += state.clickValue * 30; state.crimes++; toast('+' + fmtMoney(state.clickValue * 30) + ', +1 crime (creative billing)'); } }
+      ]
+    }
+  ];
+
+  // ── FDA Claims for mini-game ──
+  const FDA_CLAIMS = [
+    '"HBOT CURES CANCER" \u2014 posted on front door',
+    '"Reverses aging GUARANTEED" \u2014 Instagram ad',
+    '"FDA-approved for everything" \u2014 waiting room poster',
+    '"Eliminates ALL toxins" \u2014 brochure',
+    '"Replaces all medication" \u2014 email newsletter',
+    '"100% cure rate" \u2014 Yelp response',
+    '"Doctors don\'t want you to know" \u2014 TikTok',
+    '"Grows new organs" \u2014 Facebook post',
+    '"Quantum healing activated" \u2014 lobby TV',
+    '"Alternative to chemotherapy" \u2014 website banner'
+  ];
+
+  // ── DOM refs ──
+  const $ = id => document.getElementById(id);
+  const moneyEl = $('money-display');
+  const incomeEl = $('income-display');
+  const perClickEl = $('per-click');
+  const chamberEl = $('chamber');
+  const bubblesEl = $('bubbles');
+  const upgradesListEl = $('upgrades-list');
+  const statCustomers = $('stat-customers');
+  const statRevenue = $('stat-revenue');
+  const statCrimes = $('stat-crimes');
+  const statFacts = $('stat-facts');
+  const prestigePanel = $('prestige-panel');
+  const prestigeBtn = $('prestige-btn');
+  const prestigeMult = $('prestige-mult');
+  const viralNum = $('viral-num');
+
+  // ── Save/Load ──
+  function save() {
+    state.lastSave = Date.now();
+    try { localStorage.setItem('hyperbolic_save', JSON.stringify(state)); } catch(e) {}
+  }
+
+  function load() {
+    try {
+      const d = localStorage.getItem('hyperbolic_save');
+      if (d) {
+        const s = JSON.parse(d);
+        Object.assign(state, s);
+        // calculate offline earnings (capped at 2 hours)
+        const elapsed = Math.min((Date.now() - state.lastSave) / 1000, 7200);
+        if (elapsed > 10 && state.autoIncome > 0) {
+          const earned = state.autoIncome * state.viralMult * elapsed * 0.5; // 50% efficiency offline
+          state.money += earned;
+          state.totalRevenue += earned;
+          setTimeout(() => toast('Welcome back! Earned ' + fmtMoney(earned) + ' while away.'), 500);
+        }
+      }
+    } catch(e) {}
+  }
+
+  // ── Calculate derived values ──
+  function recalc() {
+    let cv = 1;
+    let ai = 0;
+    UPGRADES.forEach(u => {
+      const owned = state.upgrades[u.id] || 0;
+      if (u.effect === 'click') cv += u.value * owned;
+      else if (u.effect === 'auto') ai += u.value * owned;
+    });
+    state.clickValue = cv;
+    state.autoIncome = ai;
+  }
+
+  // ── Render ──
+  function render() {
+    const mult = state.viralMult;
+    moneyEl.textContent = fmtMoney(state.money);
+    incomeEl.textContent = fmtMoney(state.autoIncome * mult) + '/sec';
+    perClickEl.textContent = fmt(state.clickValue * mult);
+
+    statCustomers.textContent = fmt(state.customers);
+    statRevenue.textContent = fmtMoney(state.totalRevenue);
+    statCrimes.textContent = fmt(state.crimes);
+    statFacts.textContent = state.factsLearned;
+
+    // Prestige
+    if (state.totalRevenue >= 500000) {
+      prestigePanel.classList.add('visible');
+      const nextMult = (state.viralCount + 1) * 2;
+      prestigeMult.textContent = nextMult + 'x';
+      viralNum.textContent = state.viralCount;
+      prestigeBtn.disabled = state.money < 1000000;
+      prestigeBtn.textContent = state.money >= 1000000 ? 'GO VIRAL NOW' : 'Go Viral (requires $1M)';
+    }
+
+    // Upgrades
+    renderUpgrades();
+  }
+
+  function renderUpgrades() {
+    let html = '';
+    let currentTier = 0;
+    const tierNames = { 1: 'Legitimate', 2: 'Questionable', 3: 'Full Grift', 4: 'Peak Absurdity' };
+    const tierClasses = { 1: 't1', 2: 't2', 3: 't3', 4: 't4' };
+
+    UPGRADES.forEach(u => {
+      // only show if previous tier has at least one purchase, or it's tier 1
+      if (u.tier > 1) {
+        const prevTierUpgrades = UPGRADES.filter(x => x.tier === u.tier - 1);
+        const prevTierOwned = prevTierUpgrades.some(x => (state.upgrades[x.id] || 0) > 0);
+        if (!prevTierOwned) return;
+      }
+
+      if (u.tier !== currentTier) {
+        currentTier = u.tier;
+        html += '<div class="tier-label ' + tierClasses[u.tier] + '">' + tierNames[u.tier] + '</div>';
+      }
+
+      const owned = state.upgrades[u.id] || 0;
+      const maxed = owned >= u.max;
+      const cost = Math.floor(u.baseCost * Math.pow(u.costMult, owned));
+      const canAfford = state.money >= cost && !maxed;
+
+      html += '<button class="upgrade-btn' + (maxed ? ' maxed' : '') + '"'
+        + ' data-id="' + u.id + '"'
+        + ((!canAfford || maxed) ? ' disabled' : '') + '>'
+        + '<span class="up-name">' + u.name + '</span>'
+        + '<span class="up-desc">' + u.desc + '</span>'
+        + '<span class="up-cost">' + (maxed ? 'MAXED' : fmtMoney(cost)) + '</span>'
+        + (owned > 0 ? '<span class="up-owned">Owned: ' + owned + '/' + u.max + '</span>' : '')
+        + '</button>';
+    });
+
+    upgradesListEl.innerHTML = html;
+
+    // re-attach events
+    upgradesListEl.querySelectorAll('.upgrade-btn:not(:disabled)').forEach(btn => {
+      btn.addEventListener('click', () => buyUpgrade(btn.dataset.id));
+    });
+  }
+
+  // ── Buy upgrade ──
+  function buyUpgrade(id) {
+    const u = UPGRADES.find(x => x.id === id);
+    if (!u) return;
+    const owned = state.upgrades[u.id] || 0;
+    if (owned >= u.max) return;
+    const cost = Math.floor(u.baseCost * Math.pow(u.costMult, owned));
+    if (state.money < cost) return;
+
+    state.money -= cost;
+    state.upgrades[u.id] = owned + 1;
+    if (u.crime) state.crimes++;
+
+    recalc();
+    render();
+    save();
+
+    // Easter egg at certain milestones
+    if (state.crimes === 10) {
+      setTimeout(() => toast('10 wellness crimes. You\'re basically Goop now.'), 300);
+    } else if (state.crimes === 25) {
+      setTimeout(() => toast('25 crimes. You should probably start an LLC.'), 300);
+    } else if (state.crimes === 50) {
+      setTimeout(() => toast('50 wellness crimes. Deepak Chopra just followed you.'), 300);
+    }
+
+    // Tier unlock messages
+    if (u.tier === 2 && owned === 0) {
+      setTimeout(() => toast('You\'ve entered the "Questionable" tier. Your mother would be concerned.'), 500);
+    } else if (u.tier === 3 && owned === 0) {
+      setTimeout(() => toast('Full Grift unlocked. This is who you are now.'), 500);
+    } else if (u.tier === 4 && owned === 0) {
+      setTimeout(() => toast('Peak Absurdity. There\'s no coming back from Tulum.'), 500);
+    }
+  }
+
+  // ── Chamber click ──
+  function onChamberClick(e) {
+    const earned = state.clickValue * state.viralMult;
+    state.money += earned;
+    state.totalRevenue += earned;
+    state.customers++;
+
+    // floating text
+    const ft = document.createElement('div');
+    ft.className = 'float-text';
+    ft.textContent = '+' + fmtMoney(earned);
+    ft.style.left = (e.clientX - 30) + 'px';
+    ft.style.top = (e.clientY - 20) + 'px';
+    document.body.appendChild(ft);
+    setTimeout(() => ft.remove(), 1000);
+
+    // bubbles
+    for (let i = 0; i < 3; i++) {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      b.style.left = (30 + Math.random() * 160) + 'px';
+      b.style.bottom = '20px';
+      b.style.animationDuration = (1 + Math.random()) + 's';
+      bubblesEl.appendChild(b);
+      setTimeout(() => b.remove(), 2000);
+    }
+
+    render();
+  }
+
+  chamberEl.addEventListener('click', onChamberClick);
+
+  // ── Auto income ──
+  let lastTick = Date.now();
+  function tick() {
+    const now = Date.now();
+    const dt = (now - lastTick) / 1000;
+    lastTick = now;
+
+    if (state.autoIncome > 0) {
+      const earned = state.autoIncome * state.viralMult * dt;
+      state.money += earned;
+      state.totalRevenue += earned;
+    }
+
+    render();
+    requestAnimationFrame(tick);
+  }
+
+  // ── Prestige ──
+  prestigeBtn.addEventListener('click', () => {
+    if (state.money < 1000000) return;
+
+    state.viralCount++;
+    state.viralMult = state.viralCount * 2;
+    state.money = 0;
+    state.upgrades = {};
+    state.autoIncome = 0;
+    state.clickValue = 1;
+
+    recalc();
+    render();
+    save();
+
+    toast('GONE VIRAL! Earnings now ' + state.viralMult + 'x. Starting fresh with clout.');
+  });
+
+  // ── Science cards ──
+  let scienceTimer = null;
+  let scienceIndex = 0;
+
+  function showScience() {
+    // pick one we haven't shown recently
+    let available = SCIENCE_FACTS.filter((_, i) => !state.factsSeen.includes(i));
+    if (available.length === 0) { state.factsSeen = []; available = SCIENCE_FACTS; }
+
+    const idx = SCIENCE_FACTS.indexOf(available[Math.floor(Math.random() * available.length)]);
+    const fact = SCIENCE_FACTS[idx];
+
+    state.factsSeen.push(idx);
+    state.factsLearned++;
+
+    const card = $('science-card');
+    const textEl = $('sci-text');
+    const citeEl = $('sci-cite');
+    const timerEl = $('sci-timer');
+
+    textEl.textContent = fact.text;
+    citeEl.textContent = fact.cite;
+    timerEl.style.width = '100%';
+    card.classList.add('visible');
+
+    // animate timer
+    requestAnimationFrame(() => {
+      timerEl.style.transition = 'width 5s linear';
+      timerEl.style.width = '0%';
+    });
+
+    setTimeout(() => {
+      card.classList.remove('visible');
+      timerEl.style.transition = 'none';
+      timerEl.style.width = '100%';
+    }, 5200);
+
+    // check for the easter egg
+    if (state.factsLearned >= 10 && !state._easterEggShown) {
+      state._easterEggShown = true;
+      setTimeout(() => toast('Honestly, you could just... show people the actual studies.'), 6000);
+    }
+  }
+
+  function scheduleScienceCard() {
+    const delay = 25000 + Math.random() * 35000; // 25-60 seconds
+    scienceTimer = setTimeout(() => {
+      showScience();
+      scheduleScienceCard();
+    }, delay);
+  }
+
+  // ── Events ──
+  let eventTimer = null;
+
+  function triggerEvent() {
+    // FDA mini-game (20% chance)
+    if (state.crimes > 3 && Math.random() < 0.2) {
+      triggerFDA();
+      return;
+    }
+
+    const evt = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+    const overlay = $('event-overlay');
+    $('event-emoji').textContent = evt.emoji;
+    $('event-title').textContent = evt.title;
+    $('event-desc').textContent = evt.desc;
+
+    const choicesEl = $('event-choices');
+    choicesEl.innerHTML = '';
+
+    evt.choices.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'event-choice-btn';
+      btn.innerHTML = '<div class="choice-label">' + c.label + '</div><div class="choice-effect">' + c.effect + '</div>';
+      btn.addEventListener('click', () => {
+        c.fn();
+        overlay.classList.remove('active');
+        render();
+        save();
+      });
+      choicesEl.appendChild(btn);
+    });
+
+    overlay.classList.add('active');
+  }
+
+  function scheduleEvent() {
+    const delay = 40000 + Math.random() * 50000; // 40-90 seconds
+    eventTimer = setTimeout(() => {
+      // don't trigger if another overlay is active
+      if (!$('event-overlay').classList.contains('active') && !$('fda-game').classList.contains('active')) {
+        triggerEvent();
+      }
+      scheduleEvent();
+    }, delay);
+  }
+
+  // ── FDA Mini-game ──
+  function triggerFDA() {
+    const gameEl = $('fda-game');
+    const countdownEl = $('fda-countdown');
+    gameEl.classList.add('active');
+
+    // place 4-6 claims randomly
+    const numClaims = 4 + Math.floor(Math.random() * 3);
+    const claims = [];
+    const used = new Set();
+
+    for (let i = 0; i < numClaims; i++) {
+      let idx;
+      do { idx = Math.floor(Math.random() * FDA_CLAIMS.length); } while (used.has(idx));
+      used.add(idx);
+
+      const div = document.createElement('div');
+      div.className = 'fda-claim';
+      div.textContent = FDA_CLAIMS[idx];
+      div.style.top = (80 + Math.random() * (window.innerHeight - 200)) + 'px';
+      div.style.left = (20 + Math.random() * (window.innerWidth - 320)) + 'px';
+      div.addEventListener('click', () => {
+        div.classList.add('removed');
+        claims.splice(claims.indexOf(div), 1);
+      });
+      gameEl.appendChild(div);
+      claims.push(div);
+    }
+
+    let timeLeft = 6;
+    countdownEl.textContent = timeLeft;
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      countdownEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        // count remaining claims
+        const remaining = gameEl.querySelectorAll('.fda-claim:not(.removed)').length;
+        gameEl.querySelectorAll('.fda-claim').forEach(c => c.remove());
+        gameEl.classList.remove('active');
+
+        if (remaining === 0) {
+          toast('FDA Inspector found nothing! Your crimes remain hidden.');
+        } else {
+          const fine = remaining * state.clickValue * 50;
+          state.money = Math.max(0, state.money - fine);
+          state.crimes += remaining;
+          toast('FDA found ' + remaining + ' violation(s)! Fine: ' + fmtMoney(fine));
+        }
+        render();
+        save();
+      }
+    }, 1000);
+  }
+
+  // ── Toast ──
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // ── Init ──
+  load();
+  recalc();
+  render();
+  requestAnimationFrame(tick);
+
+  // start systems
+  scheduleScienceCard();
+  scheduleEvent();
+
+  // first science card after 10 seconds
+  setTimeout(showScience, 10000);
+
+  // auto-save every 30s
+  setInterval(save, 30000);
+
+  // save on close
+  window.addEventListener('beforeunload', save);
+
+  // funny income milestone messages
+  let lastMilestone = 0;
+  const milestones = [
+    { threshold: 420069, msg: 'You\'re making $420,069. Nice.' },
+    { threshold: 1000000, msg: 'You\'re a millionaire. In wellness dollars, that\'s like $40K real money.' },
+    { threshold: 10000000, msg: '$10M. You could buy an actual medical practice. But why start now?' },
+    { threshold: 100000000, msg: '$100M. Gwyneth Paltrow wants to know your location.' },
+    { threshold: 1000000000, msg: '$1B. You are now a wellness unicorn. VCs are calling. They don\'t know what HBOT is.' },
+    { threshold: 1000000000000, msg: '$1T. You have more money than most countries. All from a tube that goes pssshhh.' }
+  ];
+
+  setInterval(() => {
+    for (let i = milestones.length - 1; i >= 0; i--) {
+      if (state.totalRevenue >= milestones[i].threshold && lastMilestone < milestones[i].threshold) {
+        lastMilestone = milestones[i].threshold;
+        toast(milestones[i].msg);
+        break;
+      }
+    }
+  }, 2000);
+
+})();
+</script>
+
+</body>
+</html>

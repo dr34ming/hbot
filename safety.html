@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety — HBOT Science</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-technical">
+
+<!-- ── Sticky Nav ── -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <div class="nav-links">
+      <a href="index.html">Science</a>
+      <a href="safety.html" class="active">Safety</a>
+      <a href="costs.html">Costs</a>
+      <a href="glossary.html">Glossary</a>
+    </div>
+    <div class="toggle-wrap" id="nav-toggle">
+      <span class="toggle-label active" id="nav-label-tech">Technical</span>
+      <div class="toggle-track technical" id="nav-track">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label inactive" id="nav-label-plain">Plain English</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Page Header ── -->
+<header class="page-header">
+  <div class="container">
+    <h1>Safety &amp; Contraindications</h1>
+  </div>
+</header>
+
+<!-- ── Absolute Contraindications ── -->
+<section id="absolute">
+  <div class="container">
+    <h2>Absolute Contraindications</h2>
+    <p class="section-intro">
+      <span class="tech">Conditions where HBOT must not be administered regardless of setting or pressure.</span>
+      <span class="plain">Conditions where you should not use HBOT at all.</span>
+    </p>
+
+    <div class="tech">
+      <ul class="content-list">
+        <li><strong>Untreated <a class="term" href="glossary.html#pneumothorax">pneumothorax</a>.</strong> Pressurization can convert a simple pneumothorax to tension pneumothorax during depressurization&mdash;a life-threatening emergency.</li>
+        <li><strong>Untreated intraocular gas.</strong> Post-surgical SF<sub>6</sub> or C<sub>3</sub>F<sub>8</sub> gas expands under pressure changes, risking retinal detachment or permanent vision loss. Wait 3&ndash;6 months post-surgery for full gas resorption.</li>
+        <li><strong>Certain chemotherapy agents.</strong> Bleomycin causes fatal pulmonary toxicity potentiated by hyperoxia. Doxorubicin increases cardiotoxicity risk. Cisplatin and Disulfiram (which blocks superoxide dismutase) are also contraindicated. Get oncologist clearance before combining HBOT with any active or recent chemotherapy.</li>
+      </ul>
+    </div>
+
+    <div class="plain">
+      <ul class="content-list">
+        <li><strong>Collapsed lung (pneumothorax).</strong> Pressure changes in the chamber can make a collapsed lung much worse. Must be treated first.</li>
+        <li><strong>Recent eye surgery with gas bubble.</strong> Some eye surgeries leave a gas bubble inside the eye that expands dangerously under pressure. Wait 3&ndash;6 months for it to absorb.</li>
+        <li><strong>Certain chemo drugs.</strong> Some chemotherapy drugs (especially Bleomycin, Doxorubicin, and Cisplatin) interact badly with high oxygen. Get your oncologist's clearance.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── Relative Contraindications ── -->
+<section id="relative">
+  <div class="container">
+    <h2>Relative Contraindications</h2>
+    <p class="section-intro">
+      <span class="tech">These require evaluation, not automatic exclusion. Many patients with these conditions use HBOT safely with appropriate monitoring.</span>
+      <span class="plain">These need a conversation with your doctor, but they don't automatically rule you out.</span>
+    </p>
+
+    <div class="tech">
+      <ul class="content-list">
+        <li><strong>Active upper respiratory infection or sinusitis.</strong> Mucosal swelling impairs equalization, increasing <a class="term" href="glossary.html#barotrauma">barotrauma</a> risk. Delay until resolved.</li>
+        <li><strong>Seizure disorders.</strong> Oxygen lowers seizure threshold. Incidence at clinical pressure: ~1 in 634 treatments. At 1.5 ATA the risk drops substantially&mdash;<a class="term" href="glossary.html#ppo2">ppO<sub>2</sub></a> is roughly half that of clinical protocols.</li>
+        <li><strong>COPD or emphysema.</strong> Bullae rupture risk under pressure changes. Imaging review recommended.</li>
+        <li><strong>Pregnancy.</strong> Insufficient human data to establish safety. Animal studies haven't shown harm, but no one runs RCTs on pregnant women.</li>
+        <li><strong>Implanted devices.</strong> Pacemakers, cochlear implants, and similar devices have pressure ratings. Most modern devices are rated well above 1.5 ATA. Check with manufacturer.</li>
+        <li><strong>Severe claustrophobia.</strong> Manageable in many cases&mdash;soft chambers are see-through and can be unzipped from the inside. Anxiolytics used in clinical settings.</li>
+      </ul>
+    </div>
+
+    <div class="plain">
+      <ul class="content-list">
+        <li><strong>Cold or sinus infection.</strong> Congestion makes it hard to equalize ear pressure. Wait until you're over it.</li>
+        <li><strong>Seizure disorders.</strong> High oxygen can lower the seizure threshold. The risk is low at home pressure (~1 in 634 at clinical pressure, much lower at 1.5 ATA).</li>
+        <li><strong>COPD or emphysema.</strong> Weakened lung tissue can be stressed by pressure changes. Get imaging reviewed first.</li>
+        <li><strong>Pregnancy.</strong> Not enough human data. Probably fine, but no one's proven it.</li>
+        <li><strong>Implanted devices.</strong> Pacemakers, cochlear implants, etc. Most modern ones handle 1.5 ATA easily. Check the manufacturer rating.</li>
+        <li><strong>Severe claustrophobia.</strong> Soft chambers are see-through and unzip from the inside. Most people adapt within a few sessions.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── Common Side Effects ── -->
+<section id="side-effects">
+  <div class="container">
+    <h2>Common Side Effects</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Side Effect</th><th>Frequency</th><th>Details</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ear <a class="term" href="glossary.html#barotrauma">barotrauma</a></td>
+            <td>~50% of users report it at some point; ~2% of individual treatments</td>
+            <td>
+              <span class="tech">Middle ear barotrauma from Eustachian tube dysfunction during pressurization. Improves as equalization technique develops. Rare at 1.5 ATA vs. higher pressures.</span>
+              <span class="plain">Ear pressure or pain during pressurization, similar to flying. Gets easier with practice. Much milder at home pressure than clinical.</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Claustrophobia</td>
+            <td>~25% report it initially</td>
+            <td>
+              <span class="tech">Anxiety response to enclosed space. Soft chambers mitigate this&mdash;transparent walls, interior unzipping, lower perceived confinement. Most patients habituate within three to five sessions.</span>
+              <span class="plain">Feeling closed in. Soft chambers are see-through and you can unzip from inside. Most people adapt within three to five sessions.</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Temporary <a class="term" href="glossary.html#myopia">myopia</a></td>
+            <td>Uncommon</td>
+            <td>
+              <span class="tech">Lens refractive index change from prolonged hyperoxia exposure. Fully reversible within weeks of stopping treatment. More common in extended clinical protocols (&gt;40 sessions at 2.0+ ATA).</span>
+              <span class="plain">Mild nearsightedness that goes away within weeks after you stop. More common at clinical pressure than home.</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Fatigue / brain fog</td>
+            <td>Common early (sessions 1&ndash;35)</td>
+            <td>
+              <span class="tech">Expected component of the healing response. Immune upregulation and inflammatory clearance are metabolically expensive. Resolves as adaptive processes outpace inflammatory load.</span>
+              <span class="plain">Your body is doing repair work and that takes energy. Normal during the first month. Clears up as you turn the corner around session 35.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── Home vs Clinical Risk ── -->
+<section id="risk-comparison">
+  <div class="container">
+    <h2>Home vs. Clinical Risk</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Risk</th><th>Home (1.3&ndash;1.5 ATA, concentrator)</th><th>Clinical (2.0&ndash;3.0 ATA, 100% O<sub>2</sub>)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Fire</strong></td>
+            <td>
+              <span class="tech">Negligible. Chamber fills with normal air; concentrator delivers 93% O<sub>2</sub> only through the mask. Ambient O<sub>2</sub> in chamber stays near 21%.</span>
+              <span class="plain">Negligible. The chamber is filled with normal air. Oxygen only goes through your mask.</span>
+            </td>
+            <td>
+              <span class="tech">Real risk. Monoplace chambers flood with 100% O<sub>2</sub>. Everything becomes flammable. Strict protocols required.</span>
+              <span class="plain">Real. The whole chamber fills with pure oxygen. Static electricity or electronics can ignite it.</span>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>O<sub>2</sub> toxicity seizure</strong></td>
+            <td>
+              <span class="tech">Negligible. ppO<sub>2</sub> ~1.4 atm with concentrator at 1.5 ATA. Well below the Paul Bert threshold (~1.7 atm for extended exposure).</span>
+              <span class="plain">Negligible. The oxygen level at home pressure stays well below the seizure danger zone.</span>
+            </td>
+            <td>
+              <span class="tech">Low but real. ppO<sub>2</sub> 2.0&ndash;3.0 atm. Incidence ~1 in 634 treatments. Self-limiting (tonic-clonic resolves when O<sub>2</sub> removed).</span>
+              <span class="plain">Low but real. About 1 in 634 treatments. Seizure stops when oxygen is removed.</span>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Barotrauma</strong></td>
+            <td>
+              <span class="tech">Mild. Maximum 7 PSI (0.5 ATA gauge). Equivalent to 11 feet of seawater. Ear barotrauma possible; sinus/pulmonary extremely rare.</span>
+              <span class="plain">Mild. 7 PSI max&mdash;like diving to 11 feet. Ear discomfort possible. Serious injury very rare.</span>
+            </td>
+            <td>
+              <span class="tech">Higher. 15&ndash;30 PSI (1.0&ndash;2.0 ATA gauge). Ear, sinus, and pulmonary barotrauma all documented.</span>
+              <span class="plain">Higher. 15&ndash;30 PSI. Ear, sinus, and lung barotrauma all documented.</span>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Decompression</strong></td>
+            <td>
+              <span class="tech">None. Below the threshold for nitrogen supersaturation at any treatment duration.</span>
+              <span class="plain">None. Home pressure is too low to cause decompression issues.</span>
+            </td>
+            <td>
+              <span class="tech">Minimal above 2.0 ATA. Standard treatment durations stay within no-decompression limits, but protocol adherence matters.</span>
+              <span class="plain">Minimal. Possible above 2.0 ATA with extended sessions, but clinical protocols manage this.</span>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Pulmonary O<sub>2</sub> toxicity</strong></td>
+            <td>
+              <span class="tech">Not at standard session lengths. Lorrain-Smith effect requires sustained high ppO<sub>2</sub> beyond what concentrator-based protocols produce.</span>
+              <span class="plain">Not a factor at standard session lengths with a concentrator.</span>
+            </td>
+            <td>
+              <span class="tech">Possible with extended or repeated sessions. Tracked via UPTD (Unit Pulmonary Toxicity Dose). Air breaks mitigate accumulation.</span>
+              <span class="plain">Possible with extended treatments. Managed with air breaks during sessions.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-green">
+      <p><strong>Zero reported deaths</strong> from home soft-shell chambers at 1.3&ndash;1.5 ATA with a concentrator. Every fatal HBOT incident on record involved clinical pressure, 100% O<sub>2</sub> from tanks, or both.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── References ── -->
+<section id="refs">
+  <div class="container">
+    <h2>References</h2>
+
+    <div class="ref-section">
+      <h4>Adverse Effects</h4>
+      <p>Yan, L. et al. "Adverse effects of hyperbaric oxygen therapy: a systematic review and meta-analysis." <em>Front Med</em>, 2023.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Seizure Incidence</h4>
+      <p>Hazzard, B. et al. Seizure incidence approximately 1 in 634 treatments. <em>PLoS One</em>, 2025.</p>
+      <p>Yildiz, S. et al. Seizure incidence in 80,679 patient-treatments. <em>Aviat Space Environ Med</em>, 2004.</p>
+    </div>
+
+    <div class="ref-section">
+      <h4>Fire Safety</h4>
+      <p>FDA Safety Communication regarding hyperbaric oxygen therapy fire hazards. August 2025.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <p><strong>Not medical advice.</strong> Consult your physician before starting HBOT or any new therapy.</p>
+    <p>Compiled from clinical literature, February 2026. <a href="index.html">Science</a> &middot; <a href="safety.html">Safety</a> &middot; <a href="costs.html">Costs</a> &middot; <a href="glossary.html">Glossary</a></p>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var s = localStorage.getItem('hbot-mode');
+  if (s === 'mode-plain' || s === 'mode-technical') document.body.className = s;
+  var nt = document.getElementById('nav-track');
+  var nlt = document.getElementById('nav-label-tech');
+  var nlp = document.getElementById('nav-label-plain');
+  function tech() { return document.body.classList.contains('mode-technical'); }
+  function set(t) {
+    var m = t ? 'mode-technical' : 'mode-plain';
+    document.body.className = m;
+    localStorage.setItem('hbot-mode', m);
+    nt.className = t ? 'toggle-track technical' : 'toggle-track plain';
+    nlt.className = t ? 'toggle-label active' : 'toggle-label inactive';
+    nlp.className = t ? 'toggle-label inactive' : 'toggle-label active';
+  }
+  set(tech());
+  nt.onclick = function() { set(!tech()); };
+  nlt.onclick = function() { set(true); };
+  nlp.onclick = function() { set(false); };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var el = document.querySelector(this.getAttribute('href'));
+      if (el) {
+        e.preventDefault();
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - document.querySelector('.sticky-nav').offsetHeight - 16, behavior: 'smooth' });
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
